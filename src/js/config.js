@@ -120,6 +120,35 @@ export const CONFIG = {
       description: "Ca trưa mở rộng",
       type: "peak",
     },
+
+    // Super peak shifts (double dates and 15, 25): 10h actual, phủ tới 22:00
+    super_peak_morning: {
+      start: "08:00",
+      end: "19:00",
+      break: { start: "12:00", end: "13:00" },
+      actualHours: 10,
+      coverage: [8, 12, 13, 19],
+      description: "Ca sáng siêu peak (10h)",
+      type: "super_peak",
+    },
+    super_peak_midday: {
+      start: "10:00",
+      end: "21:00",
+      break: { start: "14:00", end: "15:00" },
+      actualHours: 10,
+      coverage: [10, 14, 15, 21],
+      description: "Ca trưa siêu peak (10h)",
+      type: "super_peak",
+    },
+    super_peak_afternoon: {
+      start: "12:00",
+      end: "22:00",
+      break: { start: "16:00", end: "17:00" },
+      actualHours: 10,
+      coverage: [12, 16, 17, 22],
+      description: "Ca chiều siêu peak (10h)",
+      type: "super_peak",
+    },
   },
 
   // Delivery schedule

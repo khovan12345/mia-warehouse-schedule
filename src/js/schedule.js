@@ -220,7 +220,26 @@ export class ScheduleManager {
       availableEmployees.length
     );
     if (availableCount >= 3) {
-      shiftTypes = ["morning", "midday", "afternoon"]; // 3 người: 8-17, 10-19, 12-20
+      // Super peak (ngày đôi và 15, 25): dùng các ca 10h để phủ tới 22h
+      const isDoubleDay = (d, m) => {
+        if (m < 10) return d === m; // 1/1..9/9
+        if (m === 10) return d === 10;
+        if (m === 11) return d === 11;
+        if (m === 12) return d === 12;
+        return false;
+      };
+      const isSuperPeak =
+        isDoubleDay(day, this.currentMonth) || [15, 25].includes(day);
+
+      if (isSuperPeak) {
+        shiftTypes = [
+          "super_peak_morning",
+          "super_peak_midday",
+          "super_peak_afternoon",
+        ]; // 8-19,10-21,12-22
+      } else {
+        shiftTypes = ["morning", "midday", "afternoon"]; // 3 người: 8-17, 10-19, 12-20
+      }
     } else {
       // 1-2 người: ưu tiên morning + afternoon để đảm bảo 20:00
       shiftTypes = ["morning", "afternoon"];
