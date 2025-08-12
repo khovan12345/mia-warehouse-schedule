@@ -244,6 +244,15 @@ class StorageManager {
     return this.load(this.keys.peakDays, []);
   }
 
+  // Custom configuration (optional advanced settings)
+  saveCustomConfig(cfg) {
+    return this.save('customConfig', cfg);
+  }
+
+  loadCustomConfig() {
+    return this.load('customConfig', null);
+  }
+
   /**
    * Export all data
    * @returns {Object} All stored data

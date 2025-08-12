@@ -69,6 +69,16 @@ class App {
     const employees = this.storage.loadEmployees();
     CONFIG.employees.list = employees.map((emp) => emp.name);
 
+    // Load custom config if any
+    const custom = this.storage.loadCustomConfig();
+    if (custom) {
+      if (custom.target) CONFIG.employees.targetHours = custom.target;
+      if (custom.count) this.updateEmployeeCount(custom.count);
+      CONFIG.restPolicy = CONFIG.restPolicy || {};
+      if (custom.restPerWeek)
+        CONFIG.restPolicy.daysPerWeek = custom.restPerWeek;
+    }
+
     // Load theme
     const theme = this.storage.loadTheme();
     this.ui.setTheme(theme);

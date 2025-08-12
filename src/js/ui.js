@@ -25,11 +25,67 @@ export class UIManager {
     // Initialize tooltips
     this.initTooltips();
 
+    // Inject quick config panel (collapsible)
+    this.injectQuickConfigPanel();
+
     // Update stats
     this.updateStats();
 
     // Render delivery schedule
     this.renderDeliverySchedule();
+  }
+
+  injectQuickConfigPanel() {
+    const sidebar = document.querySelector(".sidebar");
+    if (!sidebar) return;
+    const panel = document.createElement("div");
+    panel.className = "info-card";
+    panel.innerHTML = `
+      <div class="info-card-header"><h3 class="info-card-title">⚙️ Cài đặt nhanh</h3></div>
+      <div style="font-size:12px; line-height:1.6">
+        <div style="display:flex; gap:8px; align-items:center; margin-bottom:6px;">
+          <label style="width:120px">Công chuẩn</label>
+          <input id="cfgTargetHours" type="number" min="160" max="260" value="${CONFIG.employees.targetHours}" style="width:90px" />
+        </div>
+        <div style="display:flex; gap:8px; align-items:center; margin-bottom:6px;">
+          <label style="width:120px">Số nhân viên</label>
+          <select id="cfgEmployeeCount" style="width:120px">
+            <option ${CONFIG.employees.list.length === 2 ? "selected" : ""}>2</option>
+            <option ${CONFIG.employees.list.length === 3 ? "selected" : ""}>3</option>
+            <option ${CONFIG.employees.list.length === 4 ? "selected" : ""}>4</option>
+            <option ${CONFIG.employees.list.length === 5 ? "selected" : ""}>5</option>
+          </select>
+        </div>
+        <div style="display:flex; gap:8px; align-items:center; margin-bottom:6px;">
+          <label style="width:120px">Nghỉ/tuần</label>
+          <input id="cfgRestPerWeek" type="number" min="1" max="2" value="1" style="width:60px" />
+        </div>
+        <button id="cfgSaveBtn" class="btn btn-primary" style="margin-top:6px">Lưu cài đặt</button>
+      </div>
+    `;
+
+    sidebar.appendChild(panel);
+
+    document.getElementById("cfgSaveBtn").addEventListener("click", () => {
+      const target =
+        parseInt(document.getElementById("cfgTargetHours").value) ||
+        CONFIG.employees.targetHours;
+      const count =
+        parseInt(document.getElementById("cfgEmployeeCount").value) ||
+        CONFIG.employees.list.length;
+      const restPerWeek =
+        parseInt(document.getElementById("cfgRestPerWeek").value) || 1;
+
+      // Apply minimal set: target hours & employee count & rest policy
+      CONFIG.employees.targetHours = target;
+      this.app.updateEmployeeCount(count);
+      CONFIG.restPolicy = CONFIG.restPolicy || {};
+      CONFIG.restPolicy.daysPerWeek = restPerWeek;
+
+      // Persist
+      this.app.storage.saveCustomConfig({ target, count, restPerWeek });
+      this.showToast("success", "Đã lưu cài đặt. Hãy tạo lịch lại để áp dụng.");
+    });
   }
 
   async hideLoading() {
