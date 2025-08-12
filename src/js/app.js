@@ -279,6 +279,9 @@ class App {
 
   analyzeStaffing() {
     const analysis = this.schedule.analyzeStaffing();
+    // Cung cấp tham chiếu để UI tính thống kê ca theo schedule hiện tại
+    this.ui.app = this;
+    window.__schedule = this.schedule.currentSchedule;
     this.ui.showStaffAnalysis(analysis);
     this.ui.showToast("success", "Đã phân tích xong! Xem đề xuất ở sidebar.");
   }

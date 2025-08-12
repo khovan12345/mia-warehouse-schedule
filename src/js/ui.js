@@ -436,6 +436,79 @@ export class UIManager {
           Ngày ${analysis.peakDays.join(", ")} - Cần 3 nhân viên
         </div>
       </div>
+
+      <div style="margin-bottom: 15px;">
+        <div style="font-weight: 600; color: #1e3c72; margin-bottom: 5px;">
+          ⏱️ Thống kê ca & nhân sự
+        </div>
+        <div id="shiftStats" style="font-size: 12px; line-height: 1.6;"></div>
+      </div>
+    `;
+
+    // Render shift stats dựa trên lịch hiện tại
+    this.renderShiftStats();
+  }
+
+  renderShiftStats() {
+    const container = document.getElementById("shiftStats");
+    if (!container) return;
+
+    // Thu thập dữ liệu từ schedule hiện tại
+    const schedule = this.app?.schedule?.currentSchedule || window.__schedule;
+    if (!schedule) {
+      container.innerHTML = "<em>Chưa có dữ liệu lịch.</em>";
+      return;
+    }
+
+    let days2 = 0;
+    let days3 = 0;
+    let maxHoursDay = { day: null, hours: -Infinity };
+    let minHoursDay = { day: null, hours: Infinity };
+
+    const shiftCount = {
+      morning: 0,
+      midday: 0,
+      afternoon: 0,
+      super_peak_morning: 0,
+      super_peak_midday: 0,
+      super_peak_afternoon: 0,
+    };
+
+    Object.entries(schedule).forEach(([day, data]) => {
+      if (!data || !data.shifts) return;
+      const num = data.shifts.length;
+      if (num === 2) days2++;
+      if (num >= 3) days3++;
+
+      let dayHours = 0;
+      data.shifts.forEach((s) => {
+        shiftCount[s.type] = (shiftCount[s.type] || 0) + 1;
+        dayHours += s.hours;
+      });
+
+      if (dayHours > maxHoursDay.hours) maxHoursDay = { day, hours: dayHours };
+      if (dayHours < minHoursDay.hours) minHoursDay = { day, hours: dayHours };
+    });
+
+    const totalDays = Object.keys(schedule).length;
+    const avgDayHours = (
+      Object.values(schedule).reduce(
+        (sum, d) => sum + (d?.shifts?.reduce((h, s) => h + s.hours, 0) || 0),
+        0
+      ) / totalDays
+    ).toFixed(1);
+
+    container.innerHTML = `
+      <div>- Số ngày 2 nhân viên: <strong>${days2}</strong></div>
+      <div>- Số ngày 3 nhân viên: <strong>${days3}</strong></div>
+      <div>- Trung bình giờ công/ngày: <strong>${avgDayHours}h</strong></div>
+      <div>- Ngày cao nhất: <strong>${maxHoursDay.day}</strong> (${maxHoursDay.hours}h)</div>
+      <div>- Ngày thấp nhất: <strong>${minHoursDay.day}</strong> (${minHoursDay.hours}h)</div>
+      <div style="margin-top:6px;">- Số ca theo loại:</div>
+      <div style="font-size:11px; color:#64748b;">
+        Morning: ${shiftCount.morning} • Midday: ${shiftCount.midday} • Afternoon: ${shiftCount.afternoon}<br/>
+        SuperPeak Morning: ${shiftCount.super_peak_morning} • SuperPeak Midday: ${shiftCount.super_peak_midday} • SuperPeak Afternoon: ${shiftCount.super_peak_afternoon}
+      </div>
     `;
   }
 

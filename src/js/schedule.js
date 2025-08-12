@@ -526,16 +526,29 @@ export class ScheduleManager {
   analyzeStaffing() {
     const daysInMonth = getDaysInMonth(this.currentMonth, this.currentYear);
     const peakDays = this.getPeakDays();
-    const workingDays = daysInMonth - Math.floor(daysInMonth / 7);
 
-    const totalHoursNeeded = daysInMonth * 12;
-    const peakHoursExtra = peakDays.length * 4;
-    const totalHoursRequired = totalHoursNeeded + peakHoursExtra;
+    // Tính tổng giờ phủ thực tế dựa trên ca đã chọn: ngày thường phủ 12h, super-peak lên 14h (8-22)
+    let totalHoursRequired = 0;
+    for (let day = 1; day <= daysInMonth; day++) {
+      const isDouble = (() => {
+        if (this.currentMonth < 10) return day === this.currentMonth;
+        if (this.currentMonth === 10) return day === 10;
+        if (this.currentMonth === 11) return day === 11;
+        if (this.currentMonth === 12) return day === 12;
+        return false;
+      })();
+      const isSuperPeak = isDouble || [15, 25].includes(day);
+      totalHoursRequired += isSuperPeak ? 14 : 12; // giờ phủ kho trong ngày
+    }
 
+    // Nhân với số lượng nhân viên tối thiểu cần trong ngày
+    const minEmployeesPerDay = 2; // baseline cho phân tích
+    totalHoursRequired *= minEmployeesPerDay;
+
+    const currentStaff = CONFIG.employees.list.length;
     const employeesNeeded = Math.ceil(
       totalHoursRequired / CONFIG.employees.targetHours
     );
-    const currentStaff = CONFIG.employees.list.length;
 
     return {
       current: currentStaff,
@@ -548,7 +561,7 @@ export class ScheduleManager {
             : "maintain",
       reason:
         employeesNeeded > currentStaff
-          ? `Cần thêm ${employeesNeeded - currentStaff} nhân viên để tránh quá tải`
+          ? `Cần thêm ${employeesNeeded - currentStaff} nhân viên để đạt công chuẩn 208h/người`
           : employeesNeeded < currentStaff - 1
             ? `Có thể giảm ${currentStaff - employeesNeeded} nhân viên để tối ưu chi phí`
             : "Số lượng nhân viên hiện tại phù hợp",
@@ -558,7 +571,7 @@ export class ScheduleManager {
         overtimeRisk:
           totalHoursRequired / currentStaff - CONFIG.employees.targetHours,
       },
-      peakDays: peakDays,
+      peakDays,
       month: this.currentMonth,
       year: this.currentYear,
     };
