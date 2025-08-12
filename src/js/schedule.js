@@ -184,7 +184,8 @@ export class ScheduleManager {
     } else if (isSunday) {
       requiredEmployees = 2; // CN có 2 người (có thể điều chỉnh theo khối lượng)
     } else {
-      requiredEmployees = 2; // Ngày thường 2 người
+      // Để giảm tăng ca và đạt 208h, ngày thường dùng 3 nhân viên (xoay 3 ca)
+      requiredEmployees = 3;
     }
 
     // Nếu ngày peak mà không đủ người (do nghỉ), bắt người nghỉ đi làm
@@ -213,12 +214,10 @@ export class ScheduleManager {
 
     // Select shift types based on day type
     let shiftTypes;
-    if (isPeak || requiredEmployees === 3) {
-      shiftTypes = ["morning", "afternoon", "midday"]; // 3 ca khác nhau cho 3 người
+    if (requiredEmployees === 3) {
+      shiftTypes = ["morning", "midday", "afternoon"]; // giãn ca đều 8-20h
     } else {
-      shiftTypes = isSunday
-        ? ["morning", "afternoon"]
-        : ["morning", "afternoon"];
+      shiftTypes = ["morning", "afternoon"];
     }
 
     // Calculate current hours for each employee
@@ -231,6 +230,10 @@ export class ScheduleManager {
 
     // Sort available employees by current hours (ascending) to prioritize those with fewer hours
     const sortedEmployees = availableEmployees.sort((a, b) => {
+      // Ưu tiên người chưa làm ca trong ngày này (tránh dồn ca)
+      const aAlready = schedule?.[day]?.shifts?.some((s) => s.employee === a) ? 1 : 0;
+      const bAlready = schedule?.[day]?.shifts?.some((s) => s.employee === b) ? 1 : 0;
+      if (aAlready !== bAlready) return aAlready - bAlready;
       return employeeHours[a] - employeeHours[b];
     });
 
