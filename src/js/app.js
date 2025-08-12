@@ -77,6 +77,9 @@ class App {
       CONFIG.restPolicy = CONFIG.restPolicy || {};
       if (custom.restPerWeek)
         CONFIG.restPolicy.daysPerWeek = custom.restPerWeek;
+      if (typeof custom.disableSuper === "boolean") {
+        CONFIG.peakDays.superPeakEnabled = !custom.disableSuper;
+      }
     }
 
     // Load theme

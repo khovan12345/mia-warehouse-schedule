@@ -184,6 +184,7 @@ export const CONFIG = {
     double: true, // Double days (8/8, 9/9, etc.)
     custom: [], // User-defined peak days
     multiplier: 1.5, // Workload multiplier for peak days
+    superPeakEnabled: true, // Cho phép ca 10h (8-22) ở ngày đôi/15/25
   },
 
   // Public holidays (Vietnam)

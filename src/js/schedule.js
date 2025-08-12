@@ -262,7 +262,7 @@ export class ScheduleManager {
       const isSuperPeak =
         isDoubleDay(day, this.currentMonth) || [15, 25].includes(day);
 
-      if (isSuperPeak) {
+      if (isSuperPeak && CONFIG.peakDays.superPeakEnabled) {
         shiftTypes = [
           "super_peak_morning",
           "super_peak_midday",

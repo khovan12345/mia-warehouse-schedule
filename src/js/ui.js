@@ -60,6 +60,10 @@ export class UIManager {
           <label style="width:120px">Nghỉ/tuần</label>
           <input id="cfgRestPerWeek" type="number" min="1" max="2" value="1" style="width:60px" />
         </div>
+        <div style="display:flex; gap:8px; align-items:center; margin-bottom:6px;">
+          <label style="width:120px">Tắt super-peak (10h)</label>
+          <input id="cfgDisableSuperPeak" type="checkbox" ${CONFIG.peakDays.superPeakEnabled ? "" : "checked"} />
+        </div>
         <button id="cfgSaveBtn" class="btn btn-primary" style="margin-top:6px">Lưu cài đặt</button>
       </div>
     `;
@@ -75,6 +79,9 @@ export class UIManager {
         CONFIG.employees.list.length;
       const restPerWeek =
         parseInt(document.getElementById("cfgRestPerWeek").value) || 1;
+      const disableSuper = document.getElementById(
+        "cfgDisableSuperPeak"
+      ).checked;
 
       // Apply minimal set: target hours & employee count & rest policy
       CONFIG.employees.targetHours = target;
@@ -83,7 +90,13 @@ export class UIManager {
       CONFIG.restPolicy.daysPerWeek = restPerWeek;
 
       // Persist
-      this.app.storage.saveCustomConfig({ target, count, restPerWeek });
+      this.app.storage.saveCustomConfig({
+        target,
+        count,
+        restPerWeek,
+        disableSuper,
+      });
+      CONFIG.peakDays.superPeakEnabled = !disableSuper;
       this.showToast("success", "Đã lưu cài đặt. Hãy tạo lịch lại để áp dụng.");
     });
   }
