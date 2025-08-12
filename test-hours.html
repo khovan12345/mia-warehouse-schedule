@@ -91,6 +91,11 @@
           const scheduleManager = new ScheduleManager();
           const schedule = scheduleManager.generateSchedule(month, year);
 
+          // Show peak days
+          const peakDays = scheduleManager.getPeakDays();
+          resultsDiv.innerHTML += `📈 Ngày Peak: ${peakDays.join(", ")}\n`;
+          resultsDiv.innerHTML += `   (Cần 3 nhân viên những ngày này)\n\n`;
+
           // Calculate stats
           const stats = scheduleManager.calculateEmployeeStats();
 
@@ -123,9 +128,9 @@
             resultsDiv.innerHTML += `<span class="${cssClass}">${totalHours.toFixed(1)}h</span>`;
             resultsDiv.innerHTML += ` / ${target}h (${percentComplete}%)\n`;
             resultsDiv.innerHTML += `   - Giờ thường: ${stat.regularHours.toFixed(1)}h\n`;
-            resultsDiv.innerHTML += `   - Tăng ca: ${(stat.overtimeHours / CONFIG.multipliers.overtime).toFixed(1)}h\n`;
-            resultsDiv.innerHTML += `   - Ngày lễ: ${(stat.holidayHours / CONFIG.multipliers.holiday).toFixed(1)}h\n`;
-            resultsDiv.innerHTML += `   - Ngày nghỉ: ${stat.restDays.length} ngày\n`;
+            resultsDiv.innerHTML += `   - Tăng ca: ${(stat.overtimeHours / CONFIG.multipliers.overtime).toFixed(1)}h x1.5\n`;
+            resultsDiv.innerHTML += `   - Ngày lễ: ${(stat.holidayHours / CONFIG.multipliers.holiday).toFixed(1)}h x2\n`;
+            resultsDiv.innerHTML += `   - Ngày nghỉ: ${stat.restDays.length} ngày (${stat.restDays.join(", ")})\n`;
             resultsDiv.innerHTML += "\n";
           });
 

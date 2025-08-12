@@ -35,7 +35,7 @@ export class ScheduleManager {
     // Add double days (8/8, 9/9, 10/10, 11/11, 12/12)
     if (CONFIG.peakDays.double && this.currentMonth <= 12) {
       let doubleDay;
-      
+
       if (this.currentMonth < 10) {
         // Tháng 1-9: ngày = tháng (1/1, 2/2... 9/9)
         doubleDay = this.currentMonth;
@@ -43,7 +43,7 @@ export class ScheduleManager {
         // Tháng 10, 11, 12: lấy số cuối x2 (10/10, 11/11, 12/12)
         const lastDigit = this.currentMonth % 10;
         doubleDay = lastDigit * 11; // 0*11=0, 1*11=11, 2*11=22
-        
+
         // Tháng 10 đặc biệt: ngày 10
         if (this.currentMonth === 10) doubleDay = 10;
       }
@@ -184,21 +184,25 @@ export class ScheduleManager {
     } else {
       requiredEmployees = 2; // Ngày thường 2 người
     }
-    
+
     // Nếu ngày peak mà không đủ người (do nghỉ), bắt người nghỉ đi làm
     if (isPeak && availableEmployees.length < requiredEmployees) {
-      console.warn(`Ngày ${day} là peak nhưng chỉ có ${availableEmployees.length} người. Cần gọi thêm người nghỉ!`);
-      
-      // Tìm người đang nghỉ để gọi đi làm
-      const restingEmployees = CONFIG.employees.list.filter(
-        (emp) => employeeStats[emp].restDays.includes(day)
+      console.warn(
+        `Ngày ${day} là peak nhưng chỉ có ${availableEmployees.length} người. Cần gọi thêm người nghỉ!`
       );
-      
+
+      // Tìm người đang nghỉ để gọi đi làm
+      const restingEmployees = CONFIG.employees.list.filter((emp) =>
+        employeeStats[emp].restDays.includes(day)
+      );
+
       // Gọi người nghỉ đi làm (ưu tiên người có ít giờ công)
-      restingEmployees.forEach(emp => {
+      restingEmployees.forEach((emp) => {
         if (availableEmployees.length < requiredEmployees) {
           // Xóa ngày nghỉ này
-          employeeStats[emp].restDays = employeeStats[emp].restDays.filter(d => d !== day);
+          employeeStats[emp].restDays = employeeStats[emp].restDays.filter(
+            (d) => d !== day
+          );
           availableEmployees.push(emp);
           console.log(`Gọi ${emp} đi làm ngày peak ${day} (hủy ngày nghỉ)`);
         }
