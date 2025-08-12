@@ -264,7 +264,7 @@ export class ScheduleManager {
       const shiftType = shiftTypes[index % shiftTypes.length];
       const shift = CONFIG.shifts[shiftType];
 
-      const shiftData = {
+      let shiftData = {
         employee,
         type: shiftType,
         start: shift.start,
@@ -275,6 +275,26 @@ export class ScheduleManager {
         isHoliday: isHol,
         description: shift.description,
       };
+
+      // Clamp end-time to 20:00 on non-super-peak days
+      const isDoubleDay = (d, m) => {
+        if (m < 10) return d === m;
+        if (m === 10) return d === 10;
+        if (m === 11) return d === 11;
+        if (m === 12) return d === 12;
+        return false;
+      };
+      const isSuperPeak =
+        isDoubleDay(day, this.currentMonth) || [15, 25].includes(day);
+      if (!isSuperPeak) {
+        const [eh] = shiftData.end.split(":").map(Number);
+        if (eh > 20) {
+          const over = eh - 20;
+          shiftData.end = "20:00";
+          shiftData.hours = Math.max(0, shiftData.hours - over);
+          shiftData.isOvertime = shiftData.hours > 8;
+        }
+      }
 
       shifts.push(shiftData);
 
