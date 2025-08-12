@@ -87,20 +87,36 @@ export class ScheduleManager {
   }
 
   assignRestDays(employeeStats, daysInMonth, peakDays) {
-    const restDaysNeeded = Math.floor(daysInMonth / 7);
+    // Calculate target rest days based on 208 hours target
+    // With 8 hours per day, we need 26 working days, so rest days = total days - 26
+    const targetWorkDays = Math.ceil(CONFIG.employees.targetHours / 8);
+    const targetRestDays = Math.max(4, daysInMonth - targetWorkDays);
 
     CONFIG.employees.list.forEach((employee, index) => {
       const restDays = [];
       const preferredDayOff = (index + 2) % 7;
 
-      for (let week = 0; week < Math.ceil(daysInMonth / 7); week++) {
-        const weekStart = week * 7 + 1;
-        const weekEnd = Math.min(weekStart + 6, daysInMonth);
+      // Distribute rest days evenly across the month
+      const restDayInterval = Math.floor(daysInMonth / targetRestDays);
 
+      for (let i = 0; i < targetRestDays; i++) {
+        const targetDay = Math.min(
+          daysInMonth,
+          Math.floor((i + 0.5) * restDayInterval) + 1
+        );
+
+        // Find best day near target day
         let bestDay = null;
         let bestScore = -Infinity;
 
-        for (let day = weekStart; day <= weekEnd; day++) {
+        // Search within a 3-day window around target day
+        const searchStart = Math.max(1, targetDay - 1);
+        const searchEnd = Math.min(daysInMonth, targetDay + 1);
+
+        for (let day = searchStart; day <= searchEnd; day++) {
+          // Skip if already assigned as rest day
+          if (restDays.includes(day)) continue;
+
           const dayOfWeek = new Date(
             this.currentYear,
             this.currentMonth - 1,
@@ -114,6 +130,8 @@ export class ScheduleManager {
           if (!isHol) score += 10;
           if (dayOfWeek === preferredDayOff) score += 5;
           if (dayOfWeek >= 1 && dayOfWeek <= 4) score += 3;
+          // Prefer days closer to target
+          score -= Math.abs(day - targetDay) * 2;
 
           if (score > bestScore) {
             bestScore = score;
@@ -121,12 +139,12 @@ export class ScheduleManager {
           }
         }
 
-        if (bestDay && bestScore > 0) {
+        if (bestDay) {
           restDays.push(bestDay);
         }
       }
 
-      employeeStats[employee].restDays = restDays;
+      employeeStats[employee].restDays = restDays.sort((a, b) => a - b);
     });
   }
 
@@ -157,39 +175,50 @@ export class ScheduleManager {
         : ["morning", "afternoon", "midday"];
     }
 
-    // Assign employees to shifts
-    availableEmployees
-      .slice(0, requiredEmployees)
-      .forEach((employee, index) => {
-        const shiftType = shiftTypes[index % shiftTypes.length];
-        const shift = CONFIG.shifts[shiftType];
+    // Calculate current hours for each employee
+    const employeeHours = {};
+    availableEmployees.forEach((emp) => {
+      employeeHours[emp] =
+        employeeStats[emp].regularHours +
+        employeeStats[emp].overtimeHours / CONFIG.multipliers.overtime;
+    });
 
-        const shiftData = {
-          employee,
-          type: shiftType,
-          start: shift.start,
-          end: shift.end,
-          break: shift.break,
-          hours: shift.actualHours,
-          isOvertime: shift.actualHours > 8,
-          isHoliday: isHol,
-          description: shift.description,
-        };
+    // Sort available employees by current hours (ascending) to prioritize those with fewer hours
+    const sortedEmployees = availableEmployees.sort((a, b) => {
+      return employeeHours[a] - employeeHours[b];
+    });
 
-        shifts.push(shiftData);
+    // Assign employees to shifts (prioritizing those with fewer hours)
+    sortedEmployees.slice(0, requiredEmployees).forEach((employee, index) => {
+      const shiftType = shiftTypes[index % shiftTypes.length];
+      const shift = CONFIG.shifts[shiftType];
 
-        // Update employee hours
-        if (isHol) {
-          employeeStats[employee].overtimeHours +=
-            shift.actualHours * CONFIG.multipliers.holiday;
-        } else if (shift.actualHours > 8) {
-          employeeStats[employee].regularHours += 8;
-          employeeStats[employee].overtimeHours +=
-            (shift.actualHours - 8) * CONFIG.multipliers.overtime;
-        } else {
-          employeeStats[employee].regularHours += shift.actualHours;
-        }
-      });
+      const shiftData = {
+        employee,
+        type: shiftType,
+        start: shift.start,
+        end: shift.end,
+        break: shift.break,
+        hours: shift.actualHours,
+        isOvertime: shift.actualHours > 8,
+        isHoliday: isHol,
+        description: shift.description,
+      };
+
+      shifts.push(shiftData);
+
+      // Update employee hours
+      if (isHol) {
+        employeeStats[employee].overtimeHours +=
+          shift.actualHours * CONFIG.multipliers.holiday;
+      } else if (shift.actualHours > 8) {
+        employeeStats[employee].regularHours += 8;
+        employeeStats[employee].overtimeHours +=
+          (shift.actualHours - 8) * CONFIG.multipliers.overtime;
+      } else {
+        employeeStats[employee].regularHours += shift.actualHours;
+      }
+    });
 
     return {
       shifts,
@@ -238,45 +267,129 @@ export class ScheduleManager {
   }
 
   balanceEmployeeHours(employeeStats, daysInMonth, schedule) {
+    // First pass: Calculate current hours for all employees
+    const hoursSummary = {};
     CONFIG.employees.list.forEach((employee) => {
       const totalHours =
         employeeStats[employee].regularHours +
         employeeStats[employee].overtimeHours / CONFIG.multipliers.overtime;
-      const deficit = CONFIG.employees.targetHours - totalHours;
+      hoursSummary[employee] = {
+        current: totalHours,
+        deficit: CONFIG.employees.targetHours - totalHours,
+        workDays: [],
+      };
 
-      if (deficit > 0) {
-        // Add overtime hours to reach target
-        let hoursToAdd = deficit;
+      // Collect work days for this employee
+      for (let day = 1; day <= daysInMonth; day++) {
+        if (!employeeStats[employee].restDays.includes(day) && schedule[day]) {
+          const employeeShift = schedule[day].shifts.find(
+            (s) => s.employee === employee
+          );
+          if (employeeShift) {
+            hoursSummary[employee].workDays.push({ day, shift: employeeShift });
+          }
+        }
+      }
+    });
 
-        for (let day = 1; day <= daysInMonth && hoursToAdd > 0; day++) {
-          if (
-            !employeeStats[employee].restDays.includes(day) &&
-            schedule[day]
-          ) {
-            const dayShifts = schedule[day].shifts;
-            const employeeShift = dayShifts.find(
-              (s) => s.employee === employee
-            );
+    // Second pass: Add overtime to employees with deficit
+    Object.entries(hoursSummary).forEach(([employee, data]) => {
+      if (data.deficit > 0) {
+        let hoursToAdd = data.deficit;
 
-            if (employeeShift && employeeShift.hours < 10) {
-              const additionalHours = Math.min(2, hoursToAdd);
-              employeeShift.hours += additionalHours;
-              employeeShift.isOvertime = true;
+        // Try to add overtime to existing shifts
+        for (const workDay of data.workDays) {
+          if (hoursToAdd <= 0) break;
 
-              // Update end time
-              const [endHour, endMin] = employeeShift.end
-                .split(":")
-                .map(Number);
-              const newEndHour = Math.min(21, endHour + additionalHours);
-              employeeShift.end = `${String(newEndHour).padStart(2, "0")}:${String(endMin).padStart(2, "0")}`;
+          const shift = workDay.shift;
+          if (shift.hours < 10) {
+            const additionalHours = Math.min(2, hoursToAdd, 10 - shift.hours);
+            shift.hours += additionalHours;
+            shift.isOvertime = true;
 
-              employeeStats[employee].overtimeHours +=
-                additionalHours * CONFIG.multipliers.overtime;
-              hoursToAdd -= additionalHours;
+            // Update end time
+            const [endHour, endMin] = shift.end.split(":").map(Number);
+            const newEndHour = Math.min(21, endHour + additionalHours);
+            shift.end = `${String(newEndHour).padStart(2, "0")}:${String(endMin).padStart(2, "0")}`;
+
+            employeeStats[employee].overtimeHours +=
+              additionalHours * CONFIG.multipliers.overtime;
+            hoursToAdd -= additionalHours;
+          }
+        }
+
+        // If still deficit, try to assign employee to days they're resting
+        if (hoursToAdd > 0.5) {
+          console.warn(
+            `${employee} still needs ${hoursToAdd.toFixed(1)} hours to reach target`
+          );
+
+          // Find days where employee is resting but could work
+          for (let day = 1; day <= daysInMonth && hoursToAdd > 0; day++) {
+            if (
+              employeeStats[employee].restDays.includes(day) &&
+              schedule[day]
+            ) {
+              const dayShifts = schedule[day].shifts;
+
+              // Check if we can add this employee
+              if (dayShifts.length < 3 && !schedule[day].isSunday) {
+                // Remove from rest days
+                employeeStats[employee].restDays = employeeStats[
+                  employee
+                ].restDays.filter((d) => d !== day);
+
+                // Add a shift for this employee
+                const shiftType =
+                  dayShifts.length === 0
+                    ? "morning"
+                    : dayShifts.length === 1
+                      ? "afternoon"
+                      : "midday";
+                const shift = CONFIG.shifts[shiftType];
+
+                const newShift = {
+                  employee,
+                  type: shiftType,
+                  start: shift.start,
+                  end: shift.end,
+                  break: shift.break,
+                  hours: shift.actualHours,
+                  isOvertime: false,
+                  isHoliday: schedule[day].isHoliday,
+                  description: shift.description,
+                };
+
+                dayShifts.push(newShift);
+
+                // Update employee hours
+                if (schedule[day].isHoliday) {
+                  employeeStats[employee].overtimeHours +=
+                    shift.actualHours * CONFIG.multipliers.holiday;
+                } else {
+                  employeeStats[employee].regularHours += shift.actualHours;
+                }
+
+                hoursToAdd -= shift.actualHours;
+
+                // Recalculate coverage
+                schedule[day].coverage = this.calculateDayCoverage(dayShifts);
+              }
             }
           }
         }
       }
+    });
+
+    // Final report
+    console.log("=== Final Hours Summary ===");
+    CONFIG.employees.list.forEach((employee) => {
+      const totalHours =
+        employeeStats[employee].regularHours +
+        employeeStats[employee].overtimeHours / CONFIG.multipliers.overtime;
+      console.log(
+        `${employee}: ${totalHours.toFixed(1)}h (Target: ${CONFIG.employees.targetHours}h)`
+      );
     });
   }
 
