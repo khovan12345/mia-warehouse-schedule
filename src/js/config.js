@@ -50,8 +50,9 @@ export const CONFIG = {
     ],
     maxEmployees: 5,
     minEmployees: 2,
-    targetHours: 208,
+    targetHours: 208, // Mục tiêu 208h/tháng cho mỗi nhân viên
     maxOrdersPerEmployee: 70,
+    restDaysPerWeek: 1, // Luật: 1 ngày nghỉ/tuần
   },
 
   // Warehouse operating hours
@@ -167,9 +168,9 @@ export const CONFIG = {
 
   // Multipliers
   multipliers: {
-    overtime: 1.5,
-    holiday: 4,
-    sunday: 1.5,
+    overtime: 1.5, // Tăng ca x1.5
+    holiday: 2.0, // Ngày lễ x2
+    sunday: 1.0, // CN tính giờ thường
     night: 1.3,
   },
 

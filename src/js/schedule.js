@@ -32,12 +32,21 @@ export class ScheduleManager {
   getPeakDays() {
     const peaks = [...CONFIG.peakDays.fixed];
 
-    // Add double days
+    // Add double days (8/8, 9/9, 10/10, 11/11, 12/12)
     if (CONFIG.peakDays.double && this.currentMonth <= 12) {
-      const doubleDay =
-        this.currentMonth < 10
-          ? this.currentMonth
-          : parseInt(`${this.currentMonth}`.slice(-1).repeat(2));
+      let doubleDay;
+      
+      if (this.currentMonth < 10) {
+        // Tháng 1-9: ngày = tháng (1/1, 2/2... 9/9)
+        doubleDay = this.currentMonth;
+      } else {
+        // Tháng 10, 11, 12: lấy số cuối x2 (10/10, 11/11, 12/12)
+        const lastDigit = this.currentMonth % 10;
+        doubleDay = lastDigit * 11; // 0*11=0, 1*11=11, 2*11=22
+        
+        // Tháng 10 đặc biệt: ngày 10
+        if (this.currentMonth === 10) doubleDay = 10;
+      }
 
       const daysInMonth = getDaysInMonth(this.currentMonth, this.currentYear);
       if (doubleDay <= daysInMonth && doubleDay > 0) {
@@ -87,51 +96,48 @@ export class ScheduleManager {
   }
 
   assignRestDays(employeeStats, daysInMonth, peakDays) {
-    // Calculate target rest days based on 208 hours target
-    // With 8 hours per day, we need 26 working days, so rest days = total days - 26
-    const targetWorkDays = Math.ceil(CONFIG.employees.targetHours / 8);
-    const targetRestDays = Math.max(4, daysInMonth - targetWorkDays);
+    // Luật: Mỗi nhân viên được nghỉ 1 ngày/tuần
+    // Số tuần trong tháng = số ngày / 7
+    const weeksInMonth = Math.ceil(daysInMonth / 7);
+    const targetRestDays = weeksInMonth; // 1 ngày nghỉ/tuần
 
     CONFIG.employees.list.forEach((employee, index) => {
       const restDays = [];
-      const preferredDayOff = (index + 2) % 7;
+      // Mỗi nhân viên có ngày nghỉ ưu tiên khác nhau trong tuần
+      const preferredDayOff = (index + 1) % 7; // 0=CN, 1=T2, 2=T3...
 
-      // Distribute rest days evenly across the month
-      const restDayInterval = Math.floor(daysInMonth / targetRestDays);
+      // Phân bổ ngày nghỉ theo tuần
+      for (let week = 0; week < weeksInMonth; week++) {
+        const weekStart = week * 7 + 1;
+        const weekEnd = Math.min(weekStart + 6, daysInMonth);
 
-      for (let i = 0; i < targetRestDays; i++) {
-        const targetDay = Math.min(
-          daysInMonth,
-          Math.floor((i + 0.5) * restDayInterval) + 1
-        );
-
-        // Find best day near target day
         let bestDay = null;
         let bestScore = -Infinity;
 
-        // Search within a 3-day window around target day
-        const searchStart = Math.max(1, targetDay - 1);
-        const searchEnd = Math.min(daysInMonth, targetDay + 1);
-
-        for (let day = searchStart; day <= searchEnd; day++) {
-          // Skip if already assigned as rest day
-          if (restDays.includes(day)) continue;
-
-          const dayOfWeek = new Date(
-            this.currentYear,
-            this.currentMonth - 1,
-            day
-          ).getDay();
+        // Tìm ngày tốt nhất trong tuần để nghỉ
+        for (let day = weekStart; day <= weekEnd; day++) {
+          const date = new Date(this.currentYear, this.currentMonth - 1, day);
+          const dayOfWeek = date.getDay();
           const isPeak = peakDays.includes(day);
           const isHol = this.isHoliday(day);
 
           let score = 0;
-          if (!isPeak) score += 10;
-          if (!isHol) score += 10;
-          if (dayOfWeek === preferredDayOff) score += 5;
+
+          // Ưu tiên cao: KHÔNG nghỉ ngày peak (8/8, 9/9, 15, 25)
+          if (!isPeak) score += 30;
+          else score -= 50; // Phạt nặng nếu nghỉ ngày peak
+
+          // Ưu tiên ngày không phải lễ
+          if (!isHol) score += 20;
+
+          // Ưu tiên ngày nghỉ cố định của nhân viên
+          if (dayOfWeek === preferredDayOff) score += 10;
+
+          // Tránh nghỉ Chủ nhật nếu có thể (vì CN đã ít người làm)
+          if (dayOfWeek !== 0) score += 5;
+
+          // Ưu tiên ngày trong tuần (T2-T5)
           if (dayOfWeek >= 1 && dayOfWeek <= 4) score += 3;
-          // Prefer days closer to target
-          score -= Math.abs(day - targetDay) * 2;
 
           if (score > bestScore) {
             bestScore = score;
@@ -145,6 +151,12 @@ export class ScheduleManager {
       }
 
       employeeStats[employee].restDays = restDays.sort((a, b) => a - b);
+
+      // Log để kiểm tra
+      console.log(
+        `${employee}: ${restDays.length} ngày nghỉ -`,
+        restDays.join(", ")
+      );
     });
   }
 
@@ -158,21 +170,49 @@ export class ScheduleManager {
     const isHol = this.isHoliday(day);
     const isSunday = dayOfWeek === 0;
 
-    const availableEmployees = CONFIG.employees.list.filter(
+    let availableEmployees = CONFIG.employees.list.filter(
       (emp) => !employeeStats[emp].restDays.includes(day)
     );
 
     const shifts = [];
-    const requiredEmployees = isSunday ? 2 : isPeak ? 3 : 2;
+    // Quy định số người làm việc
+    let requiredEmployees;
+    if (isPeak) {
+      requiredEmployees = 3; // Ngày peak cần 3 người
+    } else if (isSunday) {
+      requiredEmployees = 2; // CN có 2 người (có thể điều chỉnh theo khối lượng)
+    } else {
+      requiredEmployees = 2; // Ngày thường 2 người
+    }
+    
+    // Nếu ngày peak mà không đủ người (do nghỉ), bắt người nghỉ đi làm
+    if (isPeak && availableEmployees.length < requiredEmployees) {
+      console.warn(`Ngày ${day} là peak nhưng chỉ có ${availableEmployees.length} người. Cần gọi thêm người nghỉ!`);
+      
+      // Tìm người đang nghỉ để gọi đi làm
+      const restingEmployees = CONFIG.employees.list.filter(
+        (emp) => employeeStats[emp].restDays.includes(day)
+      );
+      
+      // Gọi người nghỉ đi làm (ưu tiên người có ít giờ công)
+      restingEmployees.forEach(emp => {
+        if (availableEmployees.length < requiredEmployees) {
+          // Xóa ngày nghỉ này
+          employeeStats[emp].restDays = employeeStats[emp].restDays.filter(d => d !== day);
+          availableEmployees.push(emp);
+          console.log(`Gọi ${emp} đi làm ngày peak ${day} (hủy ngày nghỉ)`);
+        }
+      });
+    }
 
     // Select shift types based on day type
     let shiftTypes;
-    if (isPeak) {
-      shiftTypes = ["peak_morning", "peak_afternoon", "peak_midday"];
+    if (isPeak || requiredEmployees === 3) {
+      shiftTypes = ["morning", "afternoon", "midday"]; // 3 ca khác nhau cho 3 người
     } else {
       shiftTypes = isSunday
         ? ["morning", "afternoon"]
-        : ["morning", "afternoon", "midday"];
+        : ["morning", "afternoon"];
     }
 
     // Calculate current hours for each employee
@@ -209,13 +249,16 @@ export class ScheduleManager {
 
       // Update employee hours
       if (isHol) {
+        // Ngày lễ tính x2
         employeeStats[employee].overtimeHours +=
           shift.actualHours * CONFIG.multipliers.holiday;
       } else if (shift.actualHours > 8) {
+        // Tăng ca (trên 8h)
         employeeStats[employee].regularHours += 8;
         employeeStats[employee].overtimeHours +=
           (shift.actualHours - 8) * CONFIG.multipliers.overtime;
       } else {
+        // Giờ thường (kể cả CN)
         employeeStats[employee].regularHours += shift.actualHours;
       }
     });
