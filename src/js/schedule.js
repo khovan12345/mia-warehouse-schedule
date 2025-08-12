@@ -380,7 +380,7 @@ export class ScheduleManager {
     const criticalTimes = {
       "11:59": coverage.has(11),
       "18:00": coverage.has(18),
-      "15:00": coverage.has(15),
+      "16:00": coverage.has(16),
       "09:00": coverage.has(9),
     };
 
