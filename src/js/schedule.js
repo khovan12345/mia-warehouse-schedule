@@ -214,9 +214,15 @@ export class ScheduleManager {
 
     // Select shift types based on day type
     let shiftTypes;
-    if (requiredEmployees === 3) {
-      shiftTypes = ["morning", "midday", "afternoon"]; // giãn ca đều 8-20h
+    // Chọn ca theo số người THỰC SỰ có mặt để luôn phủ tới 20:00
+    const availableCount = Math.min(
+      requiredEmployees,
+      availableEmployees.length
+    );
+    if (availableCount >= 3) {
+      shiftTypes = ["morning", "midday", "afternoon"]; // 3 người: 8-17, 10-19, 12-20
     } else {
+      // 1-2 người: ưu tiên morning + afternoon để đảm bảo 20:00
       shiftTypes = ["morning", "afternoon"];
     }
 
@@ -235,7 +241,7 @@ export class ScheduleManager {
     });
 
     // Assign employees to shifts (prioritizing those with fewer hours)
-    sortedEmployees.slice(0, requiredEmployees).forEach((employee, index) => {
+    sortedEmployees.slice(0, availableCount).forEach((employee, index) => {
       const shiftType = shiftTypes[index % shiftTypes.length];
       const shift = CONFIG.shifts[shiftType];
 
