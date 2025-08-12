@@ -325,7 +325,7 @@ export class UIManager {
 
     Object.entries(stats).forEach(([employee, data]) => {
       const totalHours = data.totalHours;
-      const targetHours = CONFIG.employees.targetHours;
+      const targetHours = CONFIG.employees.targetHours; // Công chuẩn chung
       const progressPercent = Math.min(100, (totalHours / targetHours) * 100);
 
       const statElement = document.createElement("div");
@@ -334,7 +334,7 @@ export class UIManager {
       statElement.innerHTML = `
         <div class="employee-name">${employee}</div>
         <div class="hours-detail">
-          <span>Giờ chuẩn: ${data.regularHours.toFixed(1)}h</span>
+          <span>Công chuẩn: ${targetHours}h</span>
           <span>Tăng ca: ${(data.overtimeHours / CONFIG.multipliers.overtime).toFixed(1)}h</span>
         </div>
         <div class="hours-detail">
