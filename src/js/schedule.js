@@ -230,10 +230,7 @@ export class ScheduleManager {
 
     // Sort available employees by current hours (ascending) to prioritize those with fewer hours
     const sortedEmployees = availableEmployees.sort((a, b) => {
-      // Ưu tiên người chưa làm ca trong ngày này (tránh dồn ca)
-      const aAlready = schedule?.[day]?.shifts?.some((s) => s.employee === a) ? 1 : 0;
-      const bAlready = schedule?.[day]?.shifts?.some((s) => s.employee === b) ? 1 : 0;
-      if (aAlready !== bAlready) return aAlready - bAlready;
+      // Ưu tiên người có tổng giờ công hiện tại thấp hơn
       return employeeHours[a] - employeeHours[b];
     });
 
