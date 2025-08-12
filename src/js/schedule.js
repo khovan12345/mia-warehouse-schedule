@@ -11,6 +11,8 @@ export class ScheduleManager {
     this.currentMonth = new Date().getMonth() + 1;
     this.currentYear = new Date().getFullYear();
     this.strategy = "balanced";
+    // Lưu ngày nghỉ được phân bổ (đồng nhất với file gốc)
+    this.employeeRestDays = {};
   }
 
   setMonth(month) {
@@ -147,7 +149,10 @@ export class ScheduleManager {
         }
       }
 
-      employeeStats[employee].restDays = restDays.sort((a, b) => a - b);
+      const sorted = restDays.sort((a, b) => a - b);
+      employeeStats[employee].restDays = sorted;
+      // Ghi nhận để hiển thị thống kê chính xác (không tính tất cả ngày không có ca là ngày nghỉ)
+      this.employeeRestDays[employee] = sorted;
 
       // Log để kiểm tra
       console.log(
@@ -476,7 +481,7 @@ export class ScheduleManager {
       }
     });
 
-    // Calculate total hours and rest days
+    // Tính tổng giờ và gán ngày nghỉ từ kết quả phân bổ ban đầu
     Object.keys(stats).forEach((emp) => {
       // Tính tổng giờ thực tế (chia lại vì đã nhân hệ số)
       stats[emp].totalHours =
@@ -484,16 +489,10 @@ export class ScheduleManager {
         stats[emp].overtimeHours / CONFIG.multipliers.overtime +
         stats[emp].holidayHours / CONFIG.multipliers.holiday;
 
-      // Find rest days
-      const daysInMonth = getDaysInMonth(this.currentMonth, this.currentYear);
-      for (let day = 1; day <= daysInMonth; day++) {
-        const hasShift = this.currentSchedule[day]?.shifts?.some(
-          (s) => s.employee === emp
-        );
-        if (!hasShift) {
-          stats[emp].restDays.push(day);
-        }
-      }
+      // Chỉ hiển thị đúng ngày nghỉ đã phân bổ (1 ngày/tuần)
+      stats[emp].restDays = Array.isArray(this.employeeRestDays[emp])
+        ? [...this.employeeRestDays[emp]]
+        : [];
     });
 
     return stats;
