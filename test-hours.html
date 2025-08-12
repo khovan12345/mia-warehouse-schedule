@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Test Giờ Công - MIA Schedule</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 800px;
+        margin: 40px auto;
+        padding: 20px;
+        background: #f5f5f5;
+      }
+      .container {
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+      h1 {
+        color: #333;
+        text-align: center;
+      }
+      button {
+        background: #4caf50;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        font-size: 16px;
+        border-radius: 5px;
+        cursor: pointer;
+        display: block;
+        margin: 20px auto;
+      }
+      button:hover {
+        background: #45a049;
+      }
+      #results {
+        margin-top: 30px;
+        padding: 20px;
+        background: #f9f9f9;
+        border-radius: 5px;
+        font-family: monospace;
+        white-space: pre-wrap;
+        line-height: 1.5;
+      }
+      .success {
+        color: #4caf50;
+        font-weight: bold;
+      }
+      .warning {
+        color: #ff9800;
+        font-weight: bold;
+      }
+      .error {
+        color: #f44336;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🧪 Test Cân Bằng Giờ Công</h1>
+      <p style="text-align: center; color: #666">
+        Kiểm tra thuật toán phân chia ca đảm bảo 208h/tháng
+      </p>
+
+      <button onclick="runTest()">Chạy Test</button>
+
+      <div id="results"></div>
+    </div>
+
+    <script type="module">
+      import { ScheduleManager } from "./src/js/schedule.js";
+      import { CONFIG } from "./src/js/config.js";
+
+      window.runTest = async function () {
+        const resultsDiv = document.getElementById("results");
+        resultsDiv.innerHTML = "⏳ Đang chạy test...\n\n";
+
+        try {
+          // Test for current month
+          const now = new Date();
+          const month = now.getMonth() + 1;
+          const year = now.getFullYear();
+
+          resultsDiv.innerHTML += `📅 Test tháng ${month}/${year}\n`;
+          resultsDiv.innerHTML += "━".repeat(50) + "\n\n";
+
+          // Create schedule
+          const scheduleManager = new ScheduleManager();
+          const schedule = scheduleManager.generateSchedule(month, year);
+
+          // Calculate stats
+          const stats = scheduleManager.calculateEmployeeStats();
+
+          // Display results
+          resultsDiv.innerHTML += "👥 KẾT QUẢ PHÂN CHIA GIỜ CÔNG:\n\n";
+
+          let allMeetTarget = true;
+          const target = CONFIG.employees.targetHours;
+
+          CONFIG.employees.list.forEach((employee) => {
+            const stat = stats[employee];
+            const totalHours =
+              stat.regularHours +
+              stat.overtimeHours / CONFIG.multipliers.overtime +
+              stat.holidayHours / CONFIG.multipliers.holiday;
+
+            const difference = totalHours - target;
+            const percentComplete = ((totalHours / target) * 100).toFixed(1);
+
+            let status = "✅";
+            let cssClass = "success";
+
+            if (Math.abs(difference) > 2) {
+              allMeetTarget = false;
+              status = difference < 0 ? "❌" : "⚠️";
+              cssClass = difference < 0 ? "error" : "warning";
+            }
+
+            resultsDiv.innerHTML += `${status} ${employee}: `;
+            resultsDiv.innerHTML += `<span class="${cssClass}">${totalHours.toFixed(1)}h</span>`;
+            resultsDiv.innerHTML += ` / ${target}h (${percentComplete}%)\n`;
+            resultsDiv.innerHTML += `   - Giờ thường: ${stat.regularHours.toFixed(1)}h\n`;
+            resultsDiv.innerHTML += `   - Tăng ca: ${(stat.overtimeHours / CONFIG.multipliers.overtime).toFixed(1)}h\n`;
+            resultsDiv.innerHTML += `   - Ngày lễ: ${(stat.holidayHours / CONFIG.multipliers.holiday).toFixed(1)}h\n`;
+            resultsDiv.innerHTML += `   - Ngày nghỉ: ${stat.restDays.length} ngày\n`;
+            resultsDiv.innerHTML += "\n";
+          });
+
+          resultsDiv.innerHTML += "━".repeat(50) + "\n\n";
+
+          // Summary
+          const avgHours =
+            Object.values(stats).reduce((sum, stat) => {
+              return (
+                sum +
+                stat.regularHours +
+                stat.overtimeHours / CONFIG.multipliers.overtime +
+                stat.holidayHours / CONFIG.multipliers.holiday
+              );
+            }, 0) / CONFIG.employees.list.length;
+
+          resultsDiv.innerHTML += "📊 TỔNG KẾT:\n";
+          resultsDiv.innerHTML += `- Giờ trung bình: ${avgHours.toFixed(1)}h\n`;
+          resultsDiv.innerHTML += `- Target: ${target}h\n`;
+          resultsDiv.innerHTML += `- Độ lệch: ${Math.abs(avgHours - target).toFixed(1)}h\n\n`;
+
+          if (allMeetTarget) {
+            resultsDiv.innerHTML +=
+              '<span class="success">✅ TẤT CẢ NHÂN VIÊN ĐẠT TARGET!</span>\n';
+          } else {
+            resultsDiv.innerHTML +=
+              '<span class="warning">⚠️ Một số nhân viên chưa đạt target 208h</span>\n';
+            resultsDiv.innerHTML += "Thuật toán cần tiếp tục tối ưu.\n";
+          }
+
+          // Check console for detailed log
+          resultsDiv.innerHTML += "\n💡 Mở Console (F12) để xem log chi tiết.";
+        } catch (error) {
+          resultsDiv.innerHTML =
+            '<span class="error">❌ Lỗi: ' + error.message + "</span>";
+          console.error(error);
+        }
+      };
+    </script>
+  </body>
+</html>
