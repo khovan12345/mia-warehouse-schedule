@@ -15,6 +15,35 @@ export class ScheduleManager {
     this.employeeRestDays = {};
   }
 
+  normalizeScheduleEndTimes() {
+    if (!this.currentSchedule) return;
+    const isDoubleDay = (d, m) => {
+      if (m < 10) return d === m; // 1/1..9/9
+      if (m === 10) return d === 10;
+      if (m === 11) return d === 11;
+      if (m === 12) return d === 12;
+      return false;
+    };
+
+    Object.entries(this.currentSchedule).forEach(([dayStr, dayData]) => {
+      const day = parseInt(dayStr, 10);
+      if (!dayData || !Array.isArray(dayData.shifts)) return;
+      const isSuperPeak =
+        isDoubleDay(day, this.currentMonth) || [15, 25].includes(day);
+      if (isSuperPeak) return; // giữ 22h cho super-peak
+
+      dayData.shifts.forEach((s) => {
+        const [eh] = s.end.split(":").map(Number);
+        if (eh > 20) {
+          const over = eh - 20;
+          s.end = "20:00";
+          s.hours = Math.max(0, s.hours - over);
+          s.isOvertime = s.hours > 8;
+        }
+      });
+    });
+  }
+
   setMonth(month) {
     this.currentMonth = month;
   }
@@ -94,6 +123,8 @@ export class ScheduleManager {
     this.balanceEmployeeHours(employeeStats, daysInMonth, schedule);
 
     this.currentSchedule = schedule;
+    // Chuẩn hóa giờ kết thúc theo luật (ngày thường <=20:00)
+    this.normalizeScheduleEndTimes();
     return schedule;
   }
 
