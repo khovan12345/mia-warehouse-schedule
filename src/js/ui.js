@@ -335,7 +335,7 @@ export class UIManager {
         <div class="employee-name">${employee}</div>
         <div class="hours-detail">
           <span>Giờ chuẩn: ${data.regularHours.toFixed(1)}h</span>
-          <span>Tăng ca: ${data.overtimeHours.toFixed(1)}h</span>
+          <span>Tăng ca: ${(data.overtimeHours / CONFIG.multipliers.overtime).toFixed(1)}h</span>
         </div>
         <div class="hours-detail">
           <span>Tổng: ${totalHours.toFixed(1)}h / ${targetHours}h</span>

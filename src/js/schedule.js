@@ -96,18 +96,15 @@ export class ScheduleManager {
   }
 
   assignRestDays(employeeStats, daysInMonth, peakDays) {
-    // Luật: Mỗi nhân viên được nghỉ 1 ngày/tuần
-    // Số tuần trong tháng = số ngày / 7
-    const weeksInMonth = Math.ceil(daysInMonth / 7);
-    const targetRestDays = weeksInMonth; // 1 ngày nghỉ/tuần
+    // Theo file gốc: Approximately 1 day off per week
+    const restDaysNeeded = Math.floor(daysInMonth / 7); // Giống file gốc
 
     CONFIG.employees.list.forEach((employee, index) => {
       const restDays = [];
-      // Mỗi nhân viên có ngày nghỉ ưu tiên khác nhau trong tuần
-      const preferredDayOff = (index + 1) % 7; // 0=CN, 1=T2, 2=T3...
+      const preferredDayOff = (index + 2) % 7; // Stagger rest days (giống file gốc)
 
       // Phân bổ ngày nghỉ theo tuần
-      for (let week = 0; week < weeksInMonth; week++) {
+      for (let week = 0; week < Math.ceil(daysInMonth / 7); week++) {
         const weekStart = week * 7 + 1;
         const weekEnd = Math.min(weekStart + 6, daysInMonth);
 
@@ -145,7 +142,7 @@ export class ScheduleManager {
           }
         }
 
-        if (bestDay) {
+        if (bestDay && restDays.length < restDaysNeeded) {
           restDays.push(bestDay);
         }
       }
@@ -251,18 +248,18 @@ export class ScheduleManager {
 
       shifts.push(shiftData);
 
-      // Update employee hours
+      // Update employee hours (theo logic file gốc)
       if (isHol) {
-        // Ngày lễ tính x2
+        // Ngày lễ: tính vào overtimeHours với hệ số x4
         employeeStats[employee].overtimeHours +=
           shift.actualHours * CONFIG.multipliers.holiday;
       } else if (shift.actualHours > 8) {
-        // Tăng ca (trên 8h)
+        // Tăng ca: 8h đầu thường, giờ thêm x1.5
         employeeStats[employee].regularHours += 8;
         employeeStats[employee].overtimeHours +=
           (shift.actualHours - 8) * CONFIG.multipliers.overtime;
       } else {
-        // Giờ thường (kể cả CN)
+        // Giờ thường
         employeeStats[employee].regularHours += shift.actualHours;
       }
     });
@@ -462,11 +459,16 @@ export class ScheduleManager {
             stats[emp].shifts++;
 
             if (shift.isHoliday) {
-              stats[emp].holidayHours += shift.hours;
-            } else if (shift.isOvertime) {
+              // Ngày lễ: giờ làm x4 (theo file gốc - tính vào overtimeHours)
+              stats[emp].overtimeHours +=
+                shift.hours * CONFIG.multipliers.holiday;
+            } else if (shift.hours > 8) {
+              // Tăng ca: 8h đầu bình thường, giờ thêm x1.5
               stats[emp].regularHours += 8;
-              stats[emp].overtimeHours += shift.hours - 8;
+              stats[emp].overtimeHours +=
+                (shift.hours - 8) * CONFIG.multipliers.overtime;
             } else {
+              // Giờ bình thường
               stats[emp].regularHours += shift.hours;
             }
           }
@@ -476,10 +478,11 @@ export class ScheduleManager {
 
     // Calculate total hours and rest days
     Object.keys(stats).forEach((emp) => {
+      // Tính tổng giờ thực tế (chia lại vì đã nhân hệ số)
       stats[emp].totalHours =
         stats[emp].regularHours +
-        stats[emp].overtimeHours +
-        stats[emp].holidayHours;
+        stats[emp].overtimeHours / CONFIG.multipliers.overtime +
+        stats[emp].holidayHours / CONFIG.multipliers.holiday;
 
       // Find rest days
       const daysInMonth = getDaysInMonth(this.currentMonth, this.currentYear);

@@ -166,11 +166,11 @@ export const CONFIG = {
     // Lunar calendar holidays will be calculated separately
   },
 
-  // Multipliers
+  // Multipliers (giống file gốc)
   multipliers: {
     overtime: 1.5, // Tăng ca x1.5
-    holiday: 2.0, // Ngày lễ x2
-    sunday: 1.0, // CN tính giờ thường
+    holiday: 4, // Ngày lễ x4 (theo file gốc)
+    sunday: 1.5, // CN x1.5 (theo file gốc)
     night: 1.3,
   },
 
