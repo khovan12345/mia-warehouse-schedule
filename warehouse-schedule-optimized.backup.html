@@ -1,0 +1,1946 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lịch Làm Việc Kho Vận - MIA.VN (Complete System)</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        min-height: 100vh;
+        color: #333;
+      }
+
+      .container {
+        max-width: 1600px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      .header {
+        background: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(20px);
+        border-radius: 16px;
+        padding: 25px;
+        margin-bottom: 25px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+      }
+
+      .company-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+
+      .company-name {
+        font-size: 2rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #1e3c72, #2a5298);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .status-indicator {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .status-dot {
+        width: 10px;
+        height: 10px;
+        background: #4ade80;
+        border-radius: 50%;
+        animation: pulse 2s infinite;
+      }
+
+      @keyframes pulse {
+        0% {
+          box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7);
+        }
+        70% {
+          box-shadow: 0 0 0 10px rgba(74, 222, 128, 0);
+        }
+        100% {
+          box-shadow: 0 0 0 0 rgba(74, 222, 128, 0);
+        }
+      }
+
+      .controls-section {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 15px;
+        margin-bottom: 20px;
+      }
+
+      .control-group {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+      }
+
+      .control-group label {
+        font-size: 12px;
+        font-weight: 600;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .control-group select,
+      .control-group input {
+        padding: 8px 12px;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        background: white;
+        font-size: 14px;
+        transition: all 0.2s;
+      }
+
+      .control-group select:hover,
+      .control-group input:hover {
+        border-color: #2a5298;
+      }
+
+      .control-group select:focus,
+      .control-group input:focus {
+        outline: none;
+        border-color: #2a5298;
+        box-shadow: 0 0 0 3px rgba(42, 82, 152, 0.1);
+      }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 15px;
+        margin-bottom: 20px;
+      }
+
+      .stat-card {
+        background: white;
+        padding: 15px;
+        border-radius: 10px;
+        border-left: 4px solid;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .stat-card.green {
+        border-color: #4ade80;
+      }
+      .stat-card.blue {
+        border-color: #3b82f6;
+      }
+      .stat-card.orange {
+        border-color: #fb923c;
+      }
+      .stat-card.purple {
+        border-color: #a78bfa;
+      }
+      .stat-card.red {
+        border-color: #f87171;
+      }
+
+      .stat-content {
+        flex: 1;
+      }
+
+      .stat-number {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #1e293b;
+      }
+
+      .stat-label {
+        font-size: 11px;
+        color: #64748b;
+        margin-top: 2px;
+      }
+
+      .stat-icon {
+        font-size: 1.5rem;
+        opacity: 0.5;
+      }
+
+      .action-buttons {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, #1e3c72, #2a5298);
+        color: white;
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(30, 60, 114, 0.3);
+      }
+
+      .btn-secondary {
+        background: white;
+        color: #1e3c72;
+        border: 2px solid #e2e8f0;
+      }
+
+      .btn-secondary:hover {
+        background: #f8fafc;
+        border-color: #cbd5e1;
+      }
+
+      .btn-success {
+        background: linear-gradient(135deg, #4ade80, #22c55e);
+        color: white;
+      }
+
+      .btn-warning {
+        background: linear-gradient(135deg, #fbbf24, #f59e0b);
+        color: white;
+      }
+
+      .main-content {
+        display: grid;
+        grid-template-columns: 3fr 1fr;
+        gap: 20px;
+      }
+
+      .calendar-container {
+        background: rgba(255, 255, 255, 0.98);
+        border-radius: 16px;
+        padding: 25px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+      }
+
+      .calendar-header-row {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 2px;
+        margin-bottom: 5px;
+      }
+
+      .calendar-header-cell {
+        background: linear-gradient(135deg, #1e3c72, #2a5298);
+        color: white;
+        padding: 12px 5px;
+        text-align: center;
+        font-weight: 600;
+        font-size: 13px;
+        border-radius: 8px;
+      }
+
+      .calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 2px;
+      }
+
+      .calendar-day {
+        background: white;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 8px 5px;
+        min-height: 100px;
+        position: relative;
+        transition: all 0.2s;
+      }
+
+      .calendar-day:hover {
+        border-color: #2a5298;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .day-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 5px;
+      }
+
+      .day-number {
+        font-weight: bold;
+        font-size: 14px;
+        color: #1e293b;
+      }
+
+      .day-badges {
+        display: flex;
+        gap: 3px;
+      }
+
+      .badge {
+        font-size: 9px;
+        padding: 2px 5px;
+        border-radius: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+      }
+
+      .badge-peak {
+        background: #dc2626;
+        color: white;
+      }
+
+      .badge-holiday {
+        background: #fbbf24;
+        color: #78350f;
+      }
+
+      .badge-weekend {
+        background: #e0e7ff;
+        color: #4338ca;
+      }
+
+      .shifts-container {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+
+      .shift-block {
+        font-size: 10px;
+        padding: 3px 4px;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        gap: 3px;
+        font-weight: 500;
+      }
+
+      .shift-phong {
+        background: #dcfce7;
+        color: #14532d;
+      }
+      .shift-tung {
+        background: #dbeafe;
+        color: #1e3a8a;
+      }
+      .shift-tuan {
+        background: #fef3c7;
+        color: #78350f;
+      }
+      .shift-an {
+        background: #fce7f3;
+        color: #831843;
+      }
+      .shift-binh {
+        background: #e0f2fe;
+        color: #0c4a6e;
+      }
+
+      .shift-time {
+        font-size: 9px;
+        opacity: 0.8;
+      }
+
+      .delivery-indicators {
+        margin-top: 3px;
+        padding-top: 3px;
+        border-top: 1px solid #e2e8f0;
+        display: flex;
+        gap: 2px;
+        flex-wrap: wrap;
+      }
+
+      .delivery-time {
+        font-size: 9px;
+        background: #f87171;
+        color: white;
+        padding: 1px 3px;
+        border-radius: 3px;
+      }
+
+      .sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      .info-card {
+        background: rgba(255, 255, 255, 0.98);
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+      }
+
+      .info-card-title {
+        font-size: 14px;
+        font-weight: 700;
+        color: #1e3c72;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .employee-hours {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .employee-stat {
+        background: #f8fafc;
+        padding: 10px;
+        border-radius: 8px;
+        border-left: 3px solid;
+      }
+
+      .employee-stat.phong {
+        border-color: #22c55e;
+      }
+      .employee-stat.tung {
+        border-color: #3b82f6;
+      }
+      .employee-stat.tuan {
+        border-color: #f59e0b;
+      }
+      .employee-stat.an {
+        border-color: #ec4899;
+      }
+      .employee-stat.binh {
+        border-color: #06b6d4;
+      }
+
+      .employee-name {
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 5px;
+      }
+
+      .hours-detail {
+        display: flex;
+        justify-content: space-between;
+        font-size: 12px;
+        color: #64748b;
+      }
+
+      .hours-progress {
+        height: 4px;
+        background: #e2e8f0;
+        border-radius: 2px;
+        margin-top: 5px;
+        overflow: hidden;
+      }
+
+      .hours-progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, #4ade80, #22c55e);
+        border-radius: 2px;
+        transition: width 0.3s;
+      }
+
+      .delivery-schedule {
+        font-size: 12px;
+        line-height: 1.6;
+      }
+
+      .delivery-item {
+        padding: 8px;
+        background: #f8fafc;
+        border-radius: 6px;
+        margin-bottom: 8px;
+      }
+
+      .delivery-carrier {
+        font-weight: 600;
+        color: #1e3c72;
+      }
+
+      .delivery-times {
+        color: #64748b;
+        margin-top: 2px;
+      }
+
+      .optimization-status {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .status-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+      }
+
+      .status-icon {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+      }
+
+      .status-icon.success {
+        background: #dcfce7;
+        color: #22c55e;
+      }
+
+      .status-icon.warning {
+        background: #fef3c7;
+        color: #f59e0b;
+      }
+
+      .status-icon.error {
+        background: #fee2e2;
+        color: #dc2626;
+      }
+
+      .alert {
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 13px;
+      }
+
+      .alert-warning {
+        background: #fef3c7;
+        color: #78350f;
+        border-left: 4px solid #f59e0b;
+      }
+
+      .alert-success {
+        background: #dcfce7;
+        color: #14532d;
+        border-left: 4px solid #22c55e;
+      }
+
+      .alert-error {
+        background: #fee2e2;
+        color: #7f1d1d;
+        border-left: 4px solid #dc2626;
+      }
+
+      @media (max-width: 1024px) {
+        .main-content {
+          grid-template-columns: 1fr;
+        }
+
+        .sidebar {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+      }
+
+      @media (max-width: 768px) {
+        .calendar-day {
+          min-height: 80px;
+          padding: 5px 3px;
+        }
+
+        .shift-block {
+          font-size: 9px;
+        }
+
+        .controls-section {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <div class="company-info">
+          <div>
+            <div class="company-name">MIA.VN - Kho Vận</div>
+            <div style="color: #64748b; font-size: 14px">
+              Hệ thống Quản lý Lịch Làm việc | <span id="currentDate"></span>
+            </div>
+          </div>
+          <div class="status-indicator">
+            <span class="status-dot"></span>
+            <span style="font-size: 12px; color: #64748b"
+              >Hệ thống hoạt động</span
+            >
+          </div>
+        </div>
+
+        <div class="controls-section">
+          <div class="control-group">
+            <label>Tháng</label>
+            <select id="monthSelect">
+              <option value="1">Tháng 1</option>
+              <option value="2">Tháng 2</option>
+              <option value="3">Tháng 3</option>
+              <option value="4">Tháng 4</option>
+              <option value="5">Tháng 5</option>
+              <option value="6">Tháng 6</option>
+              <option value="7">Tháng 7</option>
+              <option value="8" selected>Tháng 8</option>
+              <option value="9">Tháng 9</option>
+              <option value="10">Tháng 10</option>
+              <option value="11">Tháng 11</option>
+              <option value="12">Tháng 12</option>
+            </select>
+          </div>
+
+          <div class="control-group">
+            <label>Năm</label>
+            <select id="yearSelect">
+              <option value="2024">2024</option>
+              <option value="2025" selected>2025</option>
+              <option value="2026">2026</option>
+            </select>
+          </div>
+
+          <div class="control-group">
+            <label>Chiến lược</label>
+            <select id="strategySelect">
+              <option value="balanced">Cân bằng</option>
+              <option value="peak-focus">Ưu tiên Peak</option>
+              <option value="minimal-ot">Tối thiểu tăng ca</option>
+            </select>
+          </div>
+
+          <div class="control-group">
+            <label>Số nhân viên</label>
+            <select id="employeeCount">
+              <option value="2">2 nhân viên</option>
+              <option value="3" selected>3 nhân viên</option>
+              <option value="4">4 nhân viên</option>
+              <option value="5">5 nhân viên</option>
+            </select>
+          </div>
+
+          <div class="control-group">
+            <label>Khối lượng CN (%)</label>
+            <select id="sundayWorkload">
+              <option value="30">30% (Nhẹ)</option>
+              <option value="50" selected>50% (Trung bình)</option>
+              <option value="70">70% (Nặng)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card green">
+            <div class="stat-content">
+              <div class="stat-number" id="totalEmployees">3</div>
+              <div class="stat-label">Nhân viên</div>
+            </div>
+            <div class="stat-icon">👥</div>
+          </div>
+
+          <div class="stat-card blue">
+            <div class="stat-content">
+              <div class="stat-number" id="workDays">31</div>
+              <div class="stat-label">Ngày làm việc</div>
+            </div>
+            <div class="stat-icon">📅</div>
+          </div>
+
+          <div class="stat-card orange">
+            <div class="stat-content">
+              <div class="stat-number" id="peakDaysCount">3</div>
+              <div class="stat-label">Ngày Peak</div>
+            </div>
+            <div class="stat-icon">📈</div>
+          </div>
+
+          <div class="stat-card purple">
+            <div class="stat-content">
+              <div class="stat-number">8-20h</div>
+              <div class="stat-label">Giờ hoạt động</div>
+            </div>
+            <div class="stat-icon">⏰</div>
+          </div>
+
+          <div class="stat-card red">
+            <div class="stat-content">
+              <div class="stat-number" id="staffRecommendation">3</div>
+              <div class="stat-label">Nhân viên đề xuất</div>
+            </div>
+            <div class="stat-icon">👤</div>
+          </div>
+        </div>
+
+        <div id="alerts"></div>
+
+        <div class="action-buttons">
+          <button class="btn btn-primary" onclick="generateOptimizedSchedule()">
+            <span>🚀</span> Tạo lịch tối ưu
+          </button>
+          <button class="btn btn-primary" onclick="analyzeStaffing()">
+            <span>📊</span> Phân tích nhân sự
+          </button>
+          <button class="btn btn-success" onclick="validateSchedule()">
+            <span>✔️</span> Kiểm tra
+          </button>
+          <button class="btn btn-secondary" onclick="customizePeakDays()">
+            <span>⚡</span> Tùy chỉnh Peak
+          </button>
+          <button class="btn btn-secondary" onclick="importWorkload()">
+            <span>📥</span> Import dữ liệu
+          </button>
+          <button class="btn btn-secondary" onclick="exportSchedule()">
+            <span>📊</span> Xuất Excel
+          </button>
+          <button class="btn btn-warning" onclick="clearSchedule()">
+            <span>🗑️</span> Xóa lịch
+          </button>
+        </div>
+      </div>
+
+      <div class="main-content">
+        <div class="calendar-container">
+          <div class="calendar-header-row">
+            <div class="calendar-header-cell">Chủ nhật</div>
+            <div class="calendar-header-cell">Thứ 2</div>
+            <div class="calendar-header-cell">Thứ 3</div>
+            <div class="calendar-header-cell">Thứ 4</div>
+            <div class="calendar-header-cell">Thứ 5</div>
+            <div class="calendar-header-cell">Thứ 6</div>
+            <div class="calendar-header-cell">Thứ 7</div>
+          </div>
+          <div class="calendar-grid" id="calendarGrid">
+            <!-- Calendar days will be generated here -->
+          </div>
+        </div>
+
+        <div class="sidebar">
+          <div class="info-card">
+            <div class="info-card-title"><span>📊</span> Thống kê giờ làm</div>
+            <div class="employee-hours" id="employeeHours">
+              <!-- Employee hours will be displayed here -->
+            </div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-card-title"><span>🚚</span> Lịch bàn giao</div>
+            <div class="delivery-schedule">
+              <div class="delivery-item">
+                <div class="delivery-carrier">Shopee Express</div>
+                <div class="delivery-times">11:59 & 18:00 hàng ngày</div>
+              </div>
+              <div class="delivery-item">
+                <div class="delivery-carrier">GHN Cồng kềnh</div>
+                <div class="delivery-times">11:59 & 18:00 hàng ngày</div>
+              </div>
+              <div class="delivery-item">
+                <div class="delivery-carrier">VNP Cồng kềnh</div>
+                <div class="delivery-times">
+                  15:00-15:30 (thường)<br />9:00-10:00 (CN & T2)
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-card-title">
+              <span>🎯</span> Phân tích & Đề xuất
+            </div>
+            <div id="staffAnalysis">
+              <div style="font-size: 12px; color: #64748b">
+                Chưa có phân tích. Nhấn "Phân tích nhân sự" để xem đề xuất.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Configuration
+      const CONFIG = {
+        employees: ["Phong", "Tùng", "Tuấn"],
+        targetHours: 208,
+        warehouseHours: { open: 8, close: 20 },
+        maxOrdersPerEmployee: 70, // Khối lượng đơn hàng tối đa/nhân viên
+        shifts: {
+          // Ca cố định tiêu chuẩn - 8h làm + 1h nghỉ = 9h tổng
+          morning: {
+            start: "08:00",
+            end: "17:00",
+            break: { start: "12:00", end: "13:00" },
+            actualHours: 8,
+            coverage: [8, 12, 13, 17], // Giờ phủ (bỏ giờ nghỉ)
+            description: "Ca sáng",
+          },
+          afternoon: {
+            start: "12:00",
+            end: "21:00",
+            break: { start: "16:00", end: "17:00" },
+            actualHours: 8,
+            coverage: [12, 16, 17, 21],
+            description: "Ca chiều",
+          },
+          midday: {
+            start: "10:00",
+            end: "19:00",
+            break: { start: "14:00", end: "15:00" },
+            actualHours: 8,
+            coverage: [10, 14, 15, 19],
+            description: "Ca trưa",
+          },
+          // Ca tăng cường cho ngày Peak
+          peak_morning: {
+            start: "08:00",
+            end: "18:00",
+            break: { start: "12:00", end: "13:00" },
+            actualHours: 9,
+            coverage: [8, 12, 13, 18],
+            description: "Ca sáng mở rộng",
+          },
+          peak_afternoon: {
+            start: "11:00",
+            end: "21:00",
+            break: { start: "15:00", end: "16:00" },
+            actualHours: 9,
+            coverage: [11, 15, 16, 21],
+            description: "Ca chiều mở rộng",
+          },
+          peak_midday: {
+            start: "09:00",
+            end: "19:00",
+            break: { start: "13:00", end: "14:00" },
+            actualHours: 9,
+            coverage: [9, 13, 14, 19],
+            description: "Ca trưa mở rộng",
+          },
+        },
+        deliveryTimes: {
+          shopee: ["11:59", "18:00"],
+          ghn: ["11:59", "18:00"],
+          vnp: {
+            normal: { start: "15:00", end: "15:30" },
+            special: { days: [0, 1], start: "09:00", end: "10:00" }, // CN & T2
+          },
+        },
+        // Ngày có khối lượng công việc cao
+        peakDays: {
+          fixed: [15, 25], // Sale giữa tháng và cuối tháng
+          double: true, // Ngày đôi (8/8, 9/9, ...)
+          custom: [], // Có thể thêm ngày tùy chỉnh
+        },
+        holidays: {
+          1: [1], // Tết dương lịch
+          4: [30], // Giải phóng miền Nam
+          5: [1], // Quốc tế lao động
+          9: [2], // Quốc khánh
+        },
+        overtimeMultiplier: 1.5,
+        holidayMultiplier: 4,
+        // Cài đặt tối ưu hóa
+        optimization: {
+          minEmployeesNormal: 2, // Tối thiểu nhân viên ngày thường
+          minEmployeesPeak: 3, // Tối thiểu nhân viên ngày peak
+          maxOvertimeHours: 40, // Tối đa tăng ca/tháng/người
+          restDaysPerWeek: 1, // Ngày nghỉ/tuần/người
+          coveragePriority: ["11:59", "18:00", "15:00-15:30", "09:00-10:00"],
+        },
+      };
+
+      // Employee management
+      let employeeDatabase = [
+        {
+          id: 1,
+          name: "Phong",
+          type: "fulltime",
+          experience: "senior",
+          preferred_shifts: ["morning", "midday"],
+        },
+        {
+          id: 2,
+          name: "Tùng",
+          type: "fulltime",
+          experience: "middle",
+          preferred_shifts: ["afternoon", "midday"],
+        },
+        {
+          id: 3,
+          name: "Tuấn",
+          type: "fulltime",
+          experience: "junior",
+          preferred_shifts: ["morning", "afternoon"],
+        },
+      ];
+
+      // Workload data (có thể import từ file)
+      let workloadData = {
+        // Format: { 'YYYY-MM-DD': { orders: number, estimated_hours: number } }
+      };
+
+      // State
+      let currentSchedule = {};
+      let currentMonth = 8;
+      let currentYear = 2025;
+      let strategy = "balanced";
+
+      // Initialize
+      document.addEventListener("DOMContentLoaded", () => {
+        setupEventListeners();
+        updateCalendar();
+        updateCurrentDate();
+      });
+
+      function setupEventListeners() {
+        document
+          .getElementById("monthSelect")
+          .addEventListener("change", updateCalendar);
+        document
+          .getElementById("yearSelect")
+          .addEventListener("change", updateCalendar);
+        document
+          .getElementById("strategySelect")
+          .addEventListener("change", (e) => {
+            strategy = e.target.value;
+          });
+        document
+          .getElementById("employeeCount")
+          .addEventListener("change", (e) => {
+            updateEmployeeCount(parseInt(e.target.value));
+          });
+        document
+          .getElementById("sundayWorkload")
+          .addEventListener("change", (e) => {
+            CONFIG.optimization.sundayWorkload = parseInt(e.target.value);
+          });
+      }
+
+      function updateEmployeeCount(count) {
+        const baseNames = ["Phong", "Tùng", "Tuấn", "An", "Bình"];
+        CONFIG.employees = baseNames.slice(0, count);
+
+        // Update employee database
+        employeeDatabase = CONFIG.employees.map((name, index) => ({
+          id: index + 1,
+          name: name,
+          type: "fulltime",
+          experience: index < 2 ? "senior" : "middle",
+          preferred_shifts: ["morning", "afternoon", "midday"],
+        }));
+
+        updateStats();
+      }
+
+      function updateCurrentDate() {
+        const now = new Date();
+        const dateStr = now.toLocaleDateString("vi-VN", {
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        });
+        document.getElementById("currentDate").textContent = dateStr;
+      }
+
+      function updateCalendar() {
+        currentMonth = parseInt(document.getElementById("monthSelect").value);
+        currentYear = parseInt(document.getElementById("yearSelect").value);
+        renderCalendar();
+        updateStats();
+      }
+
+      function getDaysInMonth(month, year) {
+        return new Date(year, month, 0).getDate();
+      }
+
+      function getFirstDayOfWeek(month, year) {
+        return new Date(year, month - 1, 1).getDay();
+      }
+
+      function getPeakDays(month, year) {
+        const peaks = [...CONFIG.peakDays.fixed]; // 15, 25
+
+        // Thêm ngày đôi (08/08, 09/09, etc.)
+        if (CONFIG.peakDays.double && month <= 12) {
+          const doubleDay =
+            month < 10
+              ? month
+              : parseInt(`${month}`.slice(-1) + `${month}`.slice(-1));
+          const daysInMonth = getDaysInMonth(month, year);
+          if (doubleDay <= daysInMonth && doubleDay > 0) {
+            peaks.push(doubleDay);
+          }
+        }
+
+        // Thêm ngày tùy chỉnh
+        peaks.push(...CONFIG.peakDays.custom);
+
+        return [...new Set(peaks)].sort((a, b) => a - b);
+      }
+
+      function calculateOptimalStaffing(month, year) {
+        const daysInMonth = getDaysInMonth(month, year);
+        const peakDays = getPeakDays(month, year);
+        const workingDays = daysInMonth - Math.floor(daysInMonth / 7); // Trừ chủ nhật
+
+        // Tính toán dựa trên khối lượng công việc
+        const totalHoursNeeded = daysInMonth * 12; // 12h/ngày (8h-20h)
+        const peakHoursExtra = peakDays.length * 4; // 4h extra cho mỗi ngày peak
+        const totalHoursRequired = totalHoursNeeded + peakHoursExtra;
+
+        // Tính nhân viên cần thiết
+        const employeesNeeded = Math.ceil(
+          totalHoursRequired / CONFIG.targetHours
+        );
+        const currentStaff = CONFIG.employees.length;
+
+        let recommendation = {
+          current: currentStaff,
+          optimal: employeesNeeded,
+          action: "maintain",
+          reason: "",
+          workload: {
+            totalHours: totalHoursRequired,
+            avgHoursPerEmployee: totalHoursRequired / currentStaff,
+            overtimeRisk:
+              totalHoursRequired / currentStaff - CONFIG.targetHours,
+          },
+        };
+
+        if (employeesNeeded > currentStaff) {
+          recommendation.action = "hire";
+          recommendation.reason = `Cần thêm ${employeesNeeded - currentStaff} nhân viên để tránh quá tải`;
+        } else if (employeesNeeded < currentStaff - 1) {
+          recommendation.action = "reduce";
+          recommendation.reason = `Có thể giảm ${currentStaff - employeesNeeded} nhân viên để tối ưu chi phí`;
+        } else {
+          recommendation.reason = "Số lượng nhân viên hiện tại phù hợp";
+        }
+
+        return recommendation;
+      }
+
+      function isHoliday(day, month) {
+        return CONFIG.holidays[month]?.includes(day) || false;
+      }
+
+      function renderCalendar() {
+        const grid = document.getElementById("calendarGrid");
+        grid.innerHTML = "";
+
+        const daysInMonth = getDaysInMonth(currentMonth, currentYear);
+        const firstDay = getFirstDayOfWeek(currentMonth, currentYear);
+        const peakDays = getPeakDays(currentMonth, currentYear);
+
+        // Add empty cells for alignment
+        for (let i = 0; i < firstDay; i++) {
+          const emptyDay = document.createElement("div");
+          emptyDay.className = "calendar-day";
+          emptyDay.style.visibility = "hidden";
+          grid.appendChild(emptyDay);
+        }
+
+        // Add days
+        for (let day = 1; day <= daysInMonth; day++) {
+          const dayElement = createDayElement(day, peakDays);
+          grid.appendChild(dayElement);
+        }
+      }
+
+      function createDayElement(day, peakDays) {
+        const dayElement = document.createElement("div");
+        dayElement.className = "calendar-day";
+        dayElement.id = `day-${day}`;
+
+        const dayOfWeek = new Date(currentYear, currentMonth - 1, day).getDay();
+        const isPeak = peakDays.includes(day);
+        const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+        const isHol = isHoliday(day, currentMonth);
+
+        let badges = "";
+        if (isPeak) badges += '<span class="badge badge-peak">Peak</span>';
+        if (isHol) badges += '<span class="badge badge-holiday">Lễ</span>';
+        if (isWeekend) badges += '<span class="badge badge-weekend">CN</span>';
+
+        dayElement.innerHTML = `
+                <div class="day-header">
+                    <span class="day-number">${day}</span>
+                    <div class="day-badges">${badges}</div>
+                </div>
+                <div class="shifts-container" id="shifts-${day}"></div>
+                <div class="delivery-indicators" id="delivery-${day}"></div>
+            `;
+
+        return dayElement;
+      }
+
+      function generateOptimizedSchedule() {
+        showAlert("info", "Đang tối ưu hóa lịch làm việc...");
+
+        const daysInMonth = getDaysInMonth(currentMonth, currentYear);
+        const peakDays = getPeakDays(currentMonth, currentYear);
+
+        // Initialize schedule structure
+        currentSchedule = {};
+        const employeeStats = {};
+
+        CONFIG.employees.forEach((emp) => {
+          employeeStats[emp] = {
+            regularHours: 0,
+            overtimeHours: 0,
+            restDays: [],
+            shifts: [],
+          };
+        });
+
+        // Phase 1: Assign rest days (4-5 days per month per employee)
+        assignRestDays(employeeStats, daysInMonth, peakDays);
+
+        // Phase 2: Assign shifts for working days
+        for (let day = 1; day <= daysInMonth; day++) {
+          currentSchedule[day] = assignDailyShifts(
+            day,
+            employeeStats,
+            peakDays
+          );
+        }
+
+        // Phase 3: Balance hours to reach target
+        balanceEmployeeHours(employeeStats, daysInMonth);
+
+        // Phase 4: Validate and render
+        const validation = validateScheduleInternal();
+        renderSchedule();
+        updateEmployeeStats(employeeStats);
+
+        if (validation.isValid) {
+          showAlert("success", "Lịch đã được tối ưu thành công!");
+        } else {
+          showAlert(
+            "warning",
+            "Lịch đã tạo nhưng có một số cảnh báo: " +
+              validation.warnings.join(", ")
+          );
+        }
+      }
+
+      function assignRestDays(employeeStats, daysInMonth, peakDays) {
+        const restDaysNeeded = Math.floor(daysInMonth / 7); // Approximately 1 day off per week
+
+        CONFIG.employees.forEach((employee, index) => {
+          const restDays = [];
+          const preferredDayOff = (index + 2) % 7; // Stagger rest days
+
+          for (let week = 0; week < Math.ceil(daysInMonth / 7); week++) {
+            const weekStart = week * 7 + 1;
+            const weekEnd = Math.min(weekStart + 6, daysInMonth);
+
+            // Find best day for rest in this week
+            let bestDay = null;
+            let bestScore = -Infinity;
+
+            for (let day = weekStart; day <= weekEnd; day++) {
+              const dayOfWeek = new Date(
+                currentYear,
+                currentMonth - 1,
+                day
+              ).getDay();
+              const isPeak = peakDays.includes(day);
+              const isHol = isHoliday(day, currentMonth);
+
+              // Scoring system
+              let score = 0;
+              if (!isPeak) score += 10;
+              if (!isHol) score += 10;
+              if (dayOfWeek === preferredDayOff) score += 5;
+              if (dayOfWeek >= 1 && dayOfWeek <= 4) score += 3; // Prefer weekdays
+
+              // Check coverage - ensure at least 2 employees working
+              const othersResting = CONFIG.employees.filter(
+                (emp, i) =>
+                  i !== index && employeeStats[emp].restDays.includes(day)
+              ).length;
+              if (othersResting >= 1) score -= 20; // Avoid too many resting same day
+
+              if (score > bestScore) {
+                bestScore = score;
+                bestDay = day;
+              }
+            }
+
+            if (bestDay && bestScore > 0) {
+              restDays.push(bestDay);
+            }
+          }
+
+          employeeStats[employee].restDays = restDays;
+        });
+      }
+
+      function assignDailyShifts(day, employeeStats, peakDays) {
+        const dayOfWeek = new Date(currentYear, currentMonth - 1, day).getDay();
+        const isPeak = peakDays.includes(day);
+        const isHol = isHoliday(day, currentMonth);
+        const isSunday = dayOfWeek === 0;
+
+        const availableEmployees = CONFIG.employees.filter(
+          (emp) => !employeeStats[emp].restDays.includes(day)
+        );
+
+        const shifts = [];
+        let requiredEmployees = isSunday ? 2 : isPeak ? 3 : 2;
+
+        // Đảm bảo đủ nhân viên cho ngày quan trọng
+        if (
+          availableEmployees.length < requiredEmployees &&
+          (isPeak || !isSunday)
+        ) {
+          const restingEmployees = CONFIG.employees.filter((emp) =>
+            employeeStats[emp].restDays.includes(day)
+          );
+
+          while (
+            availableEmployees.length < requiredEmployees &&
+            restingEmployees.length > 0
+          ) {
+            const employeeToWork = restingEmployees.pop();
+            const idx = employeeStats[employeeToWork].restDays.indexOf(day);
+            employeeStats[employeeToWork].restDays.splice(idx, 1);
+            availableEmployees.push(employeeToWork);
+          }
+        }
+
+        // Xử lý ca làm việc theo loại ngày
+        if (isPeak) {
+          // Ngày Peak: 3 nhân viên với ca mở rộng
+          const peakShifts = ["peak_morning", "peak_afternoon", "peak_midday"];
+          availableEmployees.slice(0, 3).forEach((employee, index) => {
+            const shiftType = peakShifts[index % peakShifts.length];
+            const shift = CONFIG.shifts[shiftType];
+
+            shifts.push({
+              employee,
+              type: shiftType,
+              start: shift.start,
+              end: shift.end,
+              break: shift.break,
+              hours: shift.actualHours,
+              isOvertime: shift.actualHours > 8,
+              description: shift.description,
+            });
+
+            // Tính giờ làm
+            if (shift.actualHours > 8) {
+              employeeStats[employee].regularHours += 8;
+              employeeStats[employee].overtimeHours +=
+                (shift.actualHours - 8) * CONFIG.overtimeMultiplier;
+            } else {
+              employeeStats[employee].regularHours += shift.actualHours;
+            }
+          });
+        } else if (isHol) {
+          // Ngày lễ: 2 nhân viên, giờ công gấp 4
+          const normalShifts = ["morning", "afternoon"];
+          availableEmployees.slice(0, 2).forEach((employee, index) => {
+            const shiftType = normalShifts[index];
+            const shift = CONFIG.shifts[shiftType];
+            const holidayHours = shift.actualHours * CONFIG.holidayMultiplier;
+
+            shifts.push({
+              employee,
+              type: shiftType,
+              start: shift.start,
+              end: shift.end,
+              break: shift.break,
+              hours: holidayHours,
+              isOvertime: false,
+              isHoliday: true,
+              description: shift.description + " (Lễ)",
+            });
+
+            employeeStats[employee].overtimeHours += holidayHours;
+          });
+        } else {
+          // Ngày thường: Rotation ca chuẩn
+          const normalShifts = isSunday
+            ? ["morning", "afternoon"]
+            : ["morning", "afternoon", "midday"];
+          const employeesToSchedule = isSunday
+            ? availableEmployees.slice(0, 2)
+            : availableEmployees.slice(0, 2);
+
+          employeesToSchedule.forEach((employee, index) => {
+            const shiftType = normalShifts[(day + index) % normalShifts.length];
+            const shift = CONFIG.shifts[shiftType];
+
+            shifts.push({
+              employee,
+              type: shiftType,
+              start: shift.start,
+              end: shift.end,
+              break: shift.break,
+              hours: shift.actualHours,
+              isOvertime: false,
+              description: shift.description,
+            });
+
+            employeeStats[employee].regularHours += shift.actualHours;
+          });
+        }
+
+        return {
+          shifts,
+          isPeak,
+          isHoliday: isHol,
+          isSunday,
+          coverage: calculateDayCoverage(shifts),
+        };
+      }
+
+      function calculateDayCoverage(shifts) {
+        const coverage = new Set();
+        shifts.forEach((shift) => {
+          const shiftCoverage = CONFIG.shifts[shift.type].coverage;
+          if (shiftCoverage.length === 4) {
+            // Xử lý ca có nghỉ giữa (coverage: [start1, end1, start2, end2])
+            for (let h = shiftCoverage[0]; h < shiftCoverage[1]; h++)
+              coverage.add(h);
+            for (let h = shiftCoverage[2]; h < shiftCoverage[3]; h++)
+              coverage.add(h);
+          } else {
+            // Xử lý ca liên tục
+            for (let h = shiftCoverage[0]; h < shiftCoverage[1]; h++)
+              coverage.add(h);
+          }
+        });
+
+        // Kiểm tra coverage quan trọng
+        const criticalTimes = {
+          "11:59": coverage.has(11),
+          "18:00": coverage.has(18),
+          "15:00": coverage.has(15),
+          "09:00": coverage.has(9),
+        };
+
+        return {
+          hours: Array.from(coverage).sort(),
+          critical: criticalTimes,
+          percentage: (coverage.size / 12) * 100, // 12h = 8h-20h
+        };
+      }
+
+      function balanceEmployeeHours(employeeStats, daysInMonth) {
+        // Check if any employee is below target hours
+        CONFIG.employees.forEach((employee) => {
+          const totalHours =
+            employeeStats[employee].regularHours +
+            employeeStats[employee].overtimeHours / CONFIG.overtimeMultiplier;
+          const deficit = CONFIG.targetHours - totalHours;
+
+          if (deficit > 0) {
+            // Add overtime shifts to reach target
+            let hoursToAdd = deficit;
+
+            for (let day = 1; day <= daysInMonth && hoursToAdd > 0; day++) {
+              if (!employeeStats[employee].restDays.includes(day)) {
+                const daySchedule = currentSchedule[day];
+                const employeeShift = daySchedule.shifts.find(
+                  (s) => s.employee === employee
+                );
+
+                if (employeeShift && employeeShift.hours < 10) {
+                  // Extend existing shift
+                  const additionalHours = Math.min(2, hoursToAdd);
+                  employeeShift.hours += additionalHours;
+                  employeeShift.isOvertime = true;
+
+                  // Update end time
+                  const [endHour, endMin] = employeeShift.end
+                    .split(":")
+                    .map(Number);
+                  const newEndHour = Math.min(21, endHour + additionalHours);
+                  employeeShift.end = `${String(newEndHour).padStart(2, "0")}:${String(endMin).padStart(2, "0")}`;
+
+                  employeeStats[employee].overtimeHours +=
+                    additionalHours * CONFIG.overtimeMultiplier;
+                  hoursToAdd -= additionalHours;
+                }
+              }
+            }
+          }
+        });
+      }
+
+      function renderSchedule() {
+        Object.keys(currentSchedule).forEach((day) => {
+          const dayData = currentSchedule[day];
+          const shiftsContainer = document.getElementById(`shifts-${day}`);
+          const deliveryContainer = document.getElementById(`delivery-${day}`);
+
+          if (shiftsContainer && dayData) {
+            // Render shifts with enhanced info
+            shiftsContainer.innerHTML = dayData.shifts
+              .map((shift) => {
+                const className = `shift-${shift.employee.toLowerCase()}`;
+                const overtimeIndicator = shift.isOvertime ? " 🔥" : "";
+                const holidayIndicator = shift.isHoliday ? " 🏮" : "";
+                const breakInfo = shift.break
+                  ? ` (nghỉ ${shift.break.start}-${shift.break.end})`
+                  : "";
+
+                return `
+                            <div class="shift-block ${className}" title="${shift.description}${breakInfo}">
+                                <span>${shift.employee}</span>
+                                <span class="shift-time">${shift.start}-${shift.end}${overtimeIndicator}${holidayIndicator}</span>
+                            </div>
+                        `;
+              })
+              .join("");
+
+            // Render delivery times and coverage indicators
+            if (deliveryContainer) {
+              const dayOfWeek = new Date(
+                currentYear,
+                currentMonth - 1,
+                parseInt(day)
+              ).getDay();
+              let deliveryHTML = "";
+
+              // Coverage indicators
+              if (dayData.coverage && dayData.coverage.critical) {
+                const critical = dayData.coverage.critical;
+                if (critical["11:59"])
+                  deliveryHTML += '<span class="delivery-time">📦 11:59</span>';
+                if (critical["18:00"])
+                  deliveryHTML += '<span class="delivery-time">📦 18:00</span>';
+                if (critical["15:00"])
+                  deliveryHTML += '<span class="delivery-time">🚚 15:00</span>';
+                if (dayOfWeek === 0 || dayOfWeek === 1) {
+                  if (critical["09:00"])
+                    deliveryHTML +=
+                      '<span class="delivery-time">🚚 9:00</span>';
+                }
+              }
+
+              // Warning for missing coverage
+              if (dayData.coverage && dayData.coverage.percentage < 80) {
+                deliveryHTML +=
+                  '<span style="background: #fee2e2; color: #dc2626; font-size: 9px; padding: 1px 3px; border-radius: 3px;">⚠️ Thiếu ca</span>';
+              }
+
+              deliveryContainer.innerHTML = deliveryHTML;
+            }
+          }
+        });
+      }
+
+      function updateEmployeeStats(employeeStats) {
+        const container = document.getElementById("employeeHours");
+        container.innerHTML = "";
+
+        CONFIG.employees.forEach((employee) => {
+          const stats = employeeStats[employee];
+          const totalHours =
+            stats.regularHours +
+            stats.overtimeHours / CONFIG.overtimeMultiplier;
+          const progressPercent = Math.min(
+            100,
+            (totalHours / CONFIG.targetHours) * 100
+          );
+          const className = employee.toLowerCase();
+
+          container.innerHTML += `
+                    <div class="employee-stat ${className}">
+                        <div class="employee-name">${employee}</div>
+                        <div class="hours-detail">
+                            <span>Giờ chuẩn: ${stats.regularHours.toFixed(1)}h</span>
+                            <span>Tăng ca: ${(stats.overtimeHours / CONFIG.overtimeMultiplier).toFixed(1)}h</span>
+                        </div>
+                        <div class="hours-detail">
+                            <span>Tổng: ${totalHours.toFixed(1)}h / ${CONFIG.targetHours}h</span>
+                            <span>${progressPercent.toFixed(1)}%</span>
+                        </div>
+                        <div class="hours-progress">
+                            <div class="hours-progress-bar" style="width: ${progressPercent}%"></div>
+                        </div>
+                        <div class="hours-detail" style="margin-top: 5px;">
+                            <span>Ngày nghỉ: ${stats.restDays.join(", ")}</span>
+                        </div>
+                    </div>
+                `;
+        });
+      }
+
+      function updateStats() {
+        const daysInMonth = getDaysInMonth(currentMonth, currentYear);
+        const peakDays = getPeakDays(currentMonth, currentYear);
+
+        document.getElementById("totalEmployees").textContent =
+          CONFIG.employees.length;
+        document.getElementById("workDays").textContent = daysInMonth;
+        document.getElementById("peakDaysCount").textContent = peakDays.length;
+
+        // Calculate coverage if schedule exists
+        if (Object.keys(currentSchedule).length > 0) {
+          let totalCoverage = 0;
+          let criticalCoverage = 0;
+          const criticalTimes = ["11:59", "18:00", "15:00"];
+
+          for (let day = 1; day <= daysInMonth; day++) {
+            if (currentSchedule[day] && currentSchedule[day].coverage) {
+              totalCoverage += currentSchedule[day].coverage.percentage;
+
+              // Check critical time coverage
+              criticalTimes.forEach((time) => {
+                const hour = parseInt(time.split(":")[0]);
+                if (currentSchedule[day].coverage.hours.includes(hour)) {
+                  criticalCoverage++;
+                }
+              });
+            }
+          }
+
+          const avgCoverage = (totalCoverage / daysInMonth).toFixed(1);
+          const criticalPercent = (
+            (criticalCoverage / (criticalTimes.length * daysInMonth)) *
+            100
+          ).toFixed(1);
+
+          // Update coverage display in a new element if needed
+          const coverageElement = document.getElementById("coveragePercent");
+          if (coverageElement) {
+            coverageElement.textContent = `${avgCoverage}%`;
+          }
+        }
+
+        // Auto-analyze staffing when stats update
+        if (Object.keys(currentSchedule).length === 0) {
+          const analysis = calculateOptimalStaffing(currentMonth, currentYear);
+          document.getElementById("staffRecommendation").textContent =
+            analysis.optimal;
+        }
+      }
+
+      function analyzeStaffing() {
+        const analysis = calculateOptimalStaffing(currentMonth, currentYear);
+        const container = document.getElementById("staffAnalysis");
+
+        let analysisHTML = `
+                <div style="margin-bottom: 15px;">
+                    <div style="font-weight: 600; color: #1e3c72; margin-bottom: 5px;">
+                        📊 Phân tích tháng ${currentMonth}/${currentYear}
+                    </div>
+                    <div style="font-size: 12px; line-height: 1.5;">
+                        <div>• Nhân viên hiện tại: <strong>${analysis.current}</strong></div>
+                        <div>• Nhân viên đề xuất: <strong>${analysis.optimal}</strong></div>
+                        <div>• Tổng giờ cần: <strong>${analysis.workload.totalHours.toFixed(0)}h</strong></div>
+                        <div>• TB giờ/người: <strong>${analysis.workload.avgHoursPerEmployee.toFixed(0)}h</strong></div>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <div style="font-weight: 600; color: #1e3c72; margin-bottom: 5px;">
+                        💡 Đề xuất
+                    </div>
+                    <div style="font-size: 12px; background: #f8fafc; padding: 8px; border-radius: 6px; border-left: 3px solid ${getActionColor(analysis.action)};">
+                        ${analysis.reason}
+                    </div>
+                </div>
+            `;
+
+        // Thêm cảnh báo nếu có
+        if (analysis.workload.overtimeRisk > 40) {
+          analysisHTML += `
+                    <div style="margin-bottom: 10px;">
+                        <div style="font-size: 11px; background: #fef3c7; color: #78350f; padding: 6px; border-radius: 4px;">
+                            ⚠️ Cảnh báo: Nguy cơ tăng ca cao (${analysis.workload.overtimeRisk.toFixed(0)}h/người)
+                        </div>
+                    </div>
+                `;
+        }
+
+        // Peak days analysis
+        const peakDays = getPeakDays(currentMonth, currentYear);
+        analysisHTML += `
+                <div style="margin-bottom: 10px;">
+                    <div style="font-weight: 600; color: #1e3c72; margin-bottom: 5px; font-size: 12px;">
+                        📈 Ngày Peak (${peakDays.length})
+                    </div>
+                    <div style="font-size: 11px; color: #64748b;">
+                        Ngày ${peakDays.join(", ")} - Cần 3 nhân viên
+                    </div>
+                </div>
+            `;
+
+        container.innerHTML = analysisHTML;
+
+        // Update recommendation stat
+        document.getElementById("staffRecommendation").textContent =
+          analysis.optimal;
+
+        showAlert("success", "Đã phân tích xong! Xem đề xuất ở sidebar.");
+      }
+
+      function getActionColor(action) {
+        switch (action) {
+          case "hire":
+            return "#dc2626";
+          case "reduce":
+            return "#2563eb";
+          default:
+            return "#22c55e";
+        }
+      }
+
+      function customizePeakDays() {
+        const currentPeaks = getPeakDays(currentMonth, currentYear);
+        const customDays = prompt(
+          `Ngày Peak hiện tại: ${currentPeaks.join(", ")}\n\n` +
+            `Nhập ngày Peak tùy chỉnh (cách nhau bằng dấu phẩy):\n` +
+            `Ví dụ: 5,12,20`,
+          CONFIG.peakDays.custom.join(",")
+        );
+
+        if (customDays !== null) {
+          try {
+            CONFIG.peakDays.custom = customDays
+              .split(",")
+              .map((d) => parseInt(d.trim()))
+              .filter((d) => d > 0 && d <= 31);
+
+            updateCalendar();
+            showAlert(
+              "success",
+              `Đã cập nhật ngày Peak: ${CONFIG.peakDays.custom.join(", ")}`
+            );
+          } catch (e) {
+            showAlert(
+              "error",
+              "Định dạng không hợp lệ. Vui lòng nhập số, cách nhau bằng dấu phẩy."
+            );
+          }
+        }
+      }
+
+      function importWorkload() {
+        const input = document.createElement("input");
+        input.type = "file";
+        input.accept = ".csv,.xlsx,.json";
+
+        input.onchange = function (e) {
+          const file = e.target.files[0];
+          if (!file) return;
+
+          const reader = new FileReader();
+          reader.onload = function (event) {
+            try {
+              let data;
+              const fileName = file.name.toLowerCase();
+
+              if (fileName.endsWith(".json")) {
+                data = JSON.parse(event.target.result);
+                workloadData = data;
+              } else if (fileName.endsWith(".csv")) {
+                // Simple CSV parsing for demo
+                const lines = event.target.result.split("\n");
+                const headers = lines[0].split(",");
+
+                for (let i = 1; i < lines.length; i++) {
+                  const values = lines[i].split(",");
+                  if (values.length >= 2) {
+                    const date = values[0].trim();
+                    const orders = parseInt(values[1].trim()) || 0;
+                    workloadData[date] = {
+                      orders: orders,
+                      estimated_hours:
+                        Math.ceil(orders / CONFIG.maxOrdersPerEmployee) * 8,
+                    };
+                  }
+                }
+              }
+
+              showAlert(
+                "success",
+                `Đã import ${Object.keys(workloadData).length} ngày dữ liệu`
+              );
+              analyzeStaffing(); // Re-analyze with new data
+            } catch (error) {
+              showAlert("error", "Lỗi đọc file: " + error.message);
+            }
+          };
+
+          reader.readAsText(file);
+        };
+
+        input.click();
+      }
+
+      function validateSchedule() {
+        const validation = validateScheduleInternal();
+
+        if (validation.isValid) {
+          showAlert(
+            "success",
+            "Lịch làm việc hợp lệ! Tất cả điều kiện đã được đáp ứng."
+          );
+        } else {
+          showAlert("error", "Lịch có vấn đề: " + validation.errors.join(", "));
+        }
+
+        if (validation.warnings.length > 0) {
+          showAlert("warning", "Cảnh báo: " + validation.warnings.join(", "));
+        }
+
+        updateOptimizationStatus(validation);
+      }
+
+      function validateScheduleInternal() {
+        const result = {
+          isValid: true,
+          errors: [],
+          warnings: [],
+        };
+
+        if (Object.keys(currentSchedule).length === 0) {
+          result.isValid = false;
+          result.errors.push("Chưa có lịch làm việc");
+          return result;
+        }
+
+        // Check coverage for critical times
+        const daysInMonth = getDaysInMonth(currentMonth, currentYear);
+        for (let day = 1; day <= daysInMonth; day++) {
+          if (currentSchedule[day]) {
+            const shifts = currentSchedule[day].shifts;
+
+            // Check 11:59 coverage
+            const noon = shifts.filter((s) => {
+              const start = parseInt(s.start.split(":")[0]);
+              const end = parseInt(s.end.split(":")[0]);
+              return start <= 11 && end >= 12;
+            });
+
+            if (noon.length === 0) {
+              result.warnings.push(`Ngày ${day}: Không có ca phủ 11:59`);
+            }
+
+            // Check 18:00 coverage
+            const evening = shifts.filter((s) => {
+              const end = parseInt(s.end.split(":")[0]);
+              return end >= 18;
+            });
+
+            if (evening.length === 0) {
+              result.warnings.push(`Ngày ${day}: Không có ca phủ 18:00`);
+            }
+          }
+        }
+
+        return result;
+      }
+
+      function updateOptimizationStatus(validation) {
+        const container = document.getElementById("optimizationStatus");
+        if (!container) return;
+
+        container.innerHTML = "";
+
+        if (validation.isValid) {
+          container.innerHTML = `
+                    <div class="status-item">
+                        <div class="status-icon success">✓</div>
+                        <span>Lịch hợp lệ</span>
+                    </div>
+                `;
+        }
+
+        validation.errors.forEach((error) => {
+          container.innerHTML += `
+                    <div class="status-item">
+                        <div class="status-icon error">✗</div>
+                        <span>${error}</span>
+                    </div>
+                `;
+        });
+
+        validation.warnings.forEach((warning) => {
+          container.innerHTML += `
+                    <div class="status-item">
+                        <div class="status-icon warning">⚠</div>
+                        <span>${warning}</span>
+                    </div>
+                `;
+        });
+      }
+
+      function showAlert(type, message) {
+        const alertsContainer = document.getElementById("alerts");
+        const alertClass = `alert-${type === "info" ? "warning" : type}`;
+        const icon = type === "success" ? "✓" : type === "error" ? "✗" : "⚠";
+
+        alertsContainer.innerHTML = `
+                <div class="alert ${alertClass}">
+                    <span>${icon}</span>
+                    <span>${message}</span>
+                </div>
+            `;
+
+        // Auto-hide after 5 seconds
+        setTimeout(() => {
+          alertsContainer.innerHTML = "";
+        }, 5000);
+      }
+
+      function exportSchedule() {
+        let csv =
+          "Ngày,Thứ,Nhân viên,Ca làm,Giờ vào,Giờ ra,Giờ nghỉ,Số giờ,Loại ca,Coverage,Ghi chú\n";
+        const daysInMonth = getDaysInMonth(currentMonth, currentYear);
+        const weekDays = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
+
+        for (let day = 1; day <= daysInMonth; day++) {
+          const dayOfWeek = new Date(
+            currentYear,
+            currentMonth - 1,
+            day
+          ).getDay();
+          const weekDay = weekDays[dayOfWeek];
+
+          if (currentSchedule[day]) {
+            const dayData = currentSchedule[day];
+            dayData.shifts.forEach((shift) => {
+              const breakTime = shift.break
+                ? `${shift.break.start}-${shift.break.end}`
+                : "Không";
+              const shiftType = shift.isHoliday
+                ? "Lễ x4"
+                : shift.isOvertime
+                  ? "Tăng ca x1.5"
+                  : "Chuẩn";
+              const coverage = dayData.coverage
+                ? `${dayData.coverage.percentage.toFixed(1)}%`
+                : "N/A";
+              const note = [];
+
+              if (dayData.isPeak) note.push("Peak Day");
+              if (dayData.isHoliday) note.push("Ngày lễ");
+              if (dayData.isSunday) note.push("Chủ nhật");
+              if (dayData.coverage && !dayData.coverage.critical["11:59"])
+                note.push("Thiếu ca 11:59");
+              if (dayData.coverage && !dayData.coverage.critical["18:00"])
+                note.push("Thiếu ca 18:00");
+
+              csv += `${day}/${currentMonth}/${currentYear},${weekDay},${shift.employee},`;
+              csv += `${shift.description || shift.type},${shift.start},${shift.end},${breakTime},`;
+              csv += `${shift.hours},${shiftType},${coverage},"${note.join("; ")}"\n`;
+            });
+          } else {
+            // Ngày không có ca
+            csv += `${day}/${currentMonth}/${currentYear},${weekDay},,,,,,,Không có ca,0%,Ngày nghỉ\n`;
+          }
+        }
+
+        // Add summary section
+        csv += "\n\n=== TỔNG KẾT THÁNG ===\n";
+        csv +=
+          "Nhân viên,Giờ chuẩn,Giờ tăng ca,Giờ lễ,Tổng giờ,Lương cơ bản,Lương tăng ca,Tổng lương,Ngày nghỉ\n";
+
+        // Calculate employee summaries
+        const employeeStats = {};
+        CONFIG.employees.forEach((emp) => {
+          employeeStats[emp] = {
+            regularHours: 0,
+            overtimeHours: 0,
+            holidayHours: 0,
+            restDays: [],
+          };
+        });
+
+        // Recalculate from current schedule
+        Object.keys(currentSchedule).forEach((day) => {
+          const dayData = currentSchedule[day];
+          dayData.shifts.forEach((shift) => {
+            const emp = shift.employee;
+            if (shift.isHoliday) {
+              employeeStats[emp].holidayHours += shift.hours;
+            } else if (shift.isOvertime) {
+              employeeStats[emp].regularHours += 8;
+              employeeStats[emp].overtimeHours += shift.hours - 8;
+            } else {
+              employeeStats[emp].regularHours += shift.hours;
+            }
+          });
+        });
+
+        // Add employee summary rows
+        CONFIG.employees.forEach((emp) => {
+          const stats = employeeStats[emp];
+          const totalHours =
+            stats.regularHours + stats.overtimeHours + stats.holidayHours;
+          const baseSalary = stats.regularHours * 25000; // 25k/giờ cơ bản
+          const overtimeSalary = stats.overtimeHours * 25000 * 1.5;
+          const holidaySalary = stats.holidayHours * 25000 * 4;
+          const totalSalary = baseSalary + overtimeSalary + holidaySalary;
+
+          csv += `${emp},${stats.regularHours},${stats.overtimeHours},${stats.holidayHours},${totalHours},`;
+          csv += `${baseSalary.toLocaleString()},${(overtimeSalary + holidaySalary).toLocaleString()},`;
+          csv += `${totalSalary.toLocaleString()},${stats.restDays.join(";")}\n`;
+        });
+
+        // Add analysis section
+        const analysis = calculateOptimalStaffing(currentMonth, currentYear);
+        csv += "\n=== PHÂN TÍCH NHÂN SỰ ===\n";
+        csv += `Số nhân viên hiện tại,${analysis.current}\n`;
+        csv += `Số nhân viên đề xuất,${analysis.optimal}\n`;
+        csv += `Tổng giờ cần thiết,${analysis.workload.totalHours}\n`;
+        csv += `Giờ trung bình/người,${analysis.workload.avgHoursPerEmployee.toFixed(1)}\n`;
+        csv += `Đề xuất,${analysis.reason}\n`;
+
+        // Download file
+        const blob = new Blob(["\ufeff" + csv], {
+          type: "text/csv;charset=utf-8;",
+        });
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute(
+          "download",
+          `Lich_KhoVan_MIA_T${currentMonth}_${currentYear}_ChiTiet.csv`
+        );
+        link.style.visibility = "hidden";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        showAlert("success", "Đã xuất file Excel chi tiết thành công!");
+      }
+
+      function clearSchedule() {
+        if (confirm("Bạn có chắc muốn xóa toàn bộ lịch hiện tại?")) {
+          currentSchedule = {};
+          renderCalendar();
+          document.getElementById("employeeHours").innerHTML = "";
+          document.getElementById("staffAnalysis").innerHTML = `
+                    <div style="font-size: 12px; color: #64748b;">
+                        Chưa có phân tích. Nhấn "Phân tích nhân sự" để xem đề xuất.
+                    </div>
+                `;
+          showAlert("warning", "Đã xóa lịch làm việc");
+          updateStats();
+        }
+      }
+    </script>
+  </body>
+</html>

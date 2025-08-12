@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Hệ thống quản lý lịch làm việc kho vận MIA.VN - Tối ưu hóa ca làm việc, tính toán giờ công tự động"
+    />
+    <meta name="theme-color" content="#1e3c72" />
+
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="MIA Schedule" />
+
+    <title>Lịch Làm Việc Kho Vận - MIA.VN</title>
+
+    <!-- Preconnect to external domains -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <!-- Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Icons -->
+    <link rel="icon" type="image/svg+xml" href="/assets/icons/favicon.svg" />
+    <link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png" />
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="/src/css/main.css" />
+    <link
+      rel="stylesheet"
+      href="/src/css/dark-mode.css"
+      media="(prefers-color-scheme: dark)"
+    />
+    <link rel="stylesheet" href="/src/css/print.css" media="print" />
+
+    <!-- Critical CSS for faster rendering -->
+    <style>
+      body {
+        margin: 0;
+        font-family:
+          "Inter",
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        min-height: 100vh;
+      }
+      .loading-screen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        transition: opacity 0.5s ease;
+      }
+      .loading-content {
+        text-align: center;
+        color: white;
+      }
+      .spinner {
+        width: 60px;
+        height: 60px;
+        border: 4px solid rgba(255, 255, 255, 0.3);
+        border-top-color: white;
+        border-radius: 50%;
+        animation: spin 1s ease-in-out infinite;
+        margin: 0 auto 20px;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loadingScreen">
+      <div class="loading-content">
+        <div class="spinner"></div>
+        <h2>Đang tải hệ thống...</h2>
+        <p>MIA.VN Schedule Management</p>
+      </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="app" class="app-container" style="display: none">
+      <!-- Header -->
+      <header class="app-header">
+        <div class="container">
+          <div class="header-content">
+            <div class="company-info">
+              <h1 class="company-name">MIA.VN - Kho Vận</h1>
+              <div class="company-subtitle">
+                Hệ thống Quản lý Lịch Làm việc | <span id="currentDate"></span>
+              </div>
+            </div>
+            <div class="header-actions">
+              <div class="status-indicator">
+                <span class="status-dot"></span>
+                <span class="status-text">Hệ thống hoạt động</span>
+              </div>
+              <button
+                class="theme-toggle"
+                id="themeToggle"
+                aria-label="Chuyển đổi theme"
+              >
+                <svg
+                  class="sun-icon"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                >
+                  <circle cx="12" cy="12" r="5"></circle>
+                  <line x1="12" y1="1" x2="12" y2="3"></line>
+                  <line x1="12" y1="21" x2="12" y2="23"></line>
+                  <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                  <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                  <line x1="1" y1="12" x2="3" y2="12"></line>
+                  <line x1="21" y1="12" x2="23" y2="12"></line>
+                  <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                  <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                </svg>
+                <svg
+                  class="moon-icon"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  style="display: none"
+                >
+                  <path
+                    d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"
+                  ></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Controls Section -->
+          <div class="controls-section">
+            <div class="control-group">
+              <label for="monthSelect">Tháng</label>
+              <select id="monthSelect" class="form-control">
+                <option value="1">Tháng 1</option>
+                <option value="2">Tháng 2</option>
+                <option value="3">Tháng 3</option>
+                <option value="4">Tháng 4</option>
+                <option value="5">Tháng 5</option>
+                <option value="6">Tháng 6</option>
+                <option value="7">Tháng 7</option>
+                <option value="8">Tháng 8</option>
+                <option value="9">Tháng 9</option>
+                <option value="10">Tháng 10</option>
+                <option value="11">Tháng 11</option>
+                <option value="12">Tháng 12</option>
+              </select>
+            </div>
+
+            <div class="control-group">
+              <label for="yearSelect">Năm</label>
+              <select id="yearSelect" class="form-control">
+                <option value="2024">2024</option>
+                <option value="2025" selected>2025</option>
+                <option value="2026">2026</option>
+              </select>
+            </div>
+
+            <div class="control-group">
+              <label for="strategySelect">Chiến lược</label>
+              <select id="strategySelect" class="form-control">
+                <option value="balanced">Cân bằng</option>
+                <option value="peak-focus">Ưu tiên Peak</option>
+                <option value="minimal-ot">Tối thiểu tăng ca</option>
+              </select>
+            </div>
+
+            <div class="control-group">
+              <label for="employeeCount">Số nhân viên</label>
+              <select id="employeeCount" class="form-control">
+                <option value="2">2 nhân viên</option>
+                <option value="3" selected>3 nhân viên</option>
+                <option value="4">4 nhân viên</option>
+                <option value="5">5 nhân viên</option>
+              </select>
+            </div>
+
+            <div class="control-group">
+              <label for="sundayWorkload">Khối lượng CN (%)</label>
+              <select id="sundayWorkload" class="form-control">
+                <option value="30">30% (Nhẹ)</option>
+                <option value="50" selected>50% (Trung bình)</option>
+                <option value="70">70% (Nặng)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Stats Grid -->
+          <div class="stats-grid" id="statsGrid">
+            <!-- Stats will be dynamically generated -->
+          </div>
+
+          <!-- Alerts Container -->
+          <div id="alerts" class="alerts-container"></div>
+
+          <!-- Action Buttons -->
+          <div class="action-buttons">
+            <button class="btn btn-primary" id="generateScheduleBtn">
+              <span class="btn-icon">🚀</span> Tạo lịch tối ưu
+            </button>
+            <button class="btn btn-primary" id="analyzeStaffingBtn">
+              <span class="btn-icon">📊</span> Phân tích nhân sự
+            </button>
+            <button class="btn btn-success" id="validateScheduleBtn">
+              <span class="btn-icon">✔️</span> Kiểm tra
+            </button>
+            <button class="btn btn-secondary" id="customizePeakBtn">
+              <span class="btn-icon">⚡</span> Tùy chỉnh Peak
+            </button>
+            <button class="btn btn-secondary" id="importDataBtn">
+              <span class="btn-icon">📥</span> Import dữ liệu
+            </button>
+            <div class="btn-group">
+              <button class="btn btn-secondary" id="exportBtn">
+                <span class="btn-icon">📊</span> Xuất dữ liệu
+              </button>
+              <button
+                class="btn btn-secondary dropdown-toggle"
+                id="exportDropdownBtn"
+              >
+                <span class="caret"></span>
+              </button>
+              <div class="dropdown-menu" id="exportMenu">
+                <a href="#" class="dropdown-item" data-export="excel"
+                  >Xuất Excel</a
+                >
+                <a href="#" class="dropdown-item" data-export="csv">Xuất CSV</a>
+                <a href="#" class="dropdown-item" data-export="json"
+                  >Xuất JSON</a
+                >
+                <a href="#" class="dropdown-item" data-export="pdf">Xuất PDF</a>
+              </div>
+            </div>
+            <button class="btn btn-secondary" id="printBtn">
+              <span class="btn-icon">🖨️</span> In lịch
+            </button>
+            <button class="btn btn-warning" id="clearScheduleBtn">
+              <span class="btn-icon">🗑️</span> Xóa lịch
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <div class="container">
+          <div class="content-grid">
+            <!-- Calendar Container -->
+            <div class="calendar-container">
+              <div class="calendar-header-row" id="calendarHeader">
+                <!-- Calendar headers will be generated -->
+              </div>
+              <div class="calendar-grid" id="calendarGrid">
+                <!-- Calendar days will be generated -->
+              </div>
+            </div>
+
+            <!-- Sidebar -->
+            <aside class="sidebar">
+              <!-- Employee Hours Card -->
+              <div class="info-card">
+                <div class="info-card-header">
+                  <h3 class="info-card-title">
+                    <span class="card-icon">📊</span> Thống kê giờ làm
+                  </h3>
+                  <button
+                    class="btn-icon"
+                    id="refreshStatsBtn"
+                    aria-label="Làm mới thống kê"
+                  >
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                    >
+                      <path
+                        d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"
+                      ></path>
+                    </svg>
+                  </button>
+                </div>
+                <div class="employee-hours" id="employeeHours">
+                  <!-- Employee stats will be generated -->
+                </div>
+              </div>
+
+              <!-- Delivery Schedule Card -->
+              <div class="info-card">
+                <div class="info-card-header">
+                  <h3 class="info-card-title">
+                    <span class="card-icon">🚚</span> Lịch bàn giao
+                  </h3>
+                </div>
+                <div class="delivery-schedule" id="deliverySchedule">
+                  <!-- Delivery schedule will be generated -->
+                </div>
+              </div>
+
+              <!-- Analysis Card -->
+              <div class="info-card">
+                <div class="info-card-header">
+                  <h3 class="info-card-title">
+                    <span class="card-icon">🎯</span> Phân tích & Đề xuất
+                  </h3>
+                </div>
+                <div id="staffAnalysis" class="staff-analysis">
+                  <div class="empty-state">
+                    <p>
+                      Chưa có phân tích. Nhấn "Phân tích nhân sự" để xem đề
+                      xuất.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Chart Card -->
+              <div class="info-card">
+                <div class="info-card-header">
+                  <h3 class="info-card-title">
+                    <span class="card-icon">📈</span> Biểu đồ thống kê
+                  </h3>
+                </div>
+                <div class="chart-container">
+                  <canvas id="statsChart"></canvas>
+                </div>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </main>
+
+      <!-- Modals -->
+      <div id="modalContainer"></div>
+
+      <!-- Toast Container -->
+      <div id="toastContainer" class="toast-container"></div>
+    </div>
+
+    <!-- Scripts -->
+    <script type="module" src="/src/js/app.js"></script>
+
+    <!-- Register Service Worker -->
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker
+            .register("/service-worker.js")
+            .then((registration) => console.log("SW registered:", registration))
+            .catch((error) => console.log("SW registration failed:", error));
+        });
+      }
+    </script>
+  </body>
+</html>

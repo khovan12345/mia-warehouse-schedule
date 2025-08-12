@@ -1,0 +1,224 @@
+/* ===========================
+   Dark Mode Styles
+   =========================== */
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Override colors for dark mode */
+    --bg-primary: #0f172a;
+    --bg-secondary: #1e293b;
+    --bg-tertiary: #334155;
+    --text-primary: #f1f5f9;
+    --text-secondary: #cbd5e1;
+    --text-tertiary: #94a3b8;
+    --border-color: #334155;
+
+    /* Adjust shadows for dark mode */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.6);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.7);
+  }
+}
+
+/* Apply dark mode when class is present */
+body.dark-mode {
+  /* Background gradient for dark mode */
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+}
+
+body.dark-mode .app-header,
+body.dark-mode .calendar-container,
+body.dark-mode .info-card {
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(20px);
+}
+
+body.dark-mode .company-name {
+  background: linear-gradient(135deg, #60a5fa, #a78bfa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+body.dark-mode .theme-toggle {
+  background: var(--bg-secondary);
+  border-color: var(--border-color);
+}
+
+body.dark-mode .theme-toggle:hover {
+  background: var(--bg-tertiary);
+  border-color: #60a5fa;
+}
+
+body.dark-mode .form-control {
+  background: var(--bg-secondary);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+body.dark-mode .form-control:hover {
+  border-color: #60a5fa;
+}
+
+body.dark-mode .form-control:focus {
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+}
+
+body.dark-mode .stat-card {
+  background: var(--bg-secondary);
+}
+
+body.dark-mode .btn-secondary {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+body.dark-mode .btn-secondary:hover {
+  background: var(--bg-tertiary);
+  border-color: #475569;
+}
+
+body.dark-mode .calendar-day {
+  background: var(--bg-secondary);
+  border-color: var(--border-color);
+}
+
+body.dark-mode .calendar-day:hover {
+  border-color: #60a5fa;
+}
+
+body.dark-mode .shift-phong {
+  background: #064e3b;
+  color: #6ee7b7;
+}
+
+body.dark-mode .shift-tung {
+  background: #1e3a8a;
+  color: #93c5fd;
+}
+
+body.dark-mode .shift-tuan {
+  background: #78350f;
+  color: #fde68a;
+}
+
+body.dark-mode .shift-an {
+  background: #831843;
+  color: #f9a8d4;
+}
+
+body.dark-mode .shift-binh {
+  background: #0c4a6e;
+  color: #7dd3c0;
+}
+
+body.dark-mode .delivery-time {
+  background: #dc2626;
+  color: white;
+}
+
+body.dark-mode .employee-stat {
+  background: var(--bg-tertiary);
+}
+
+body.dark-mode .delivery-item {
+  background: var(--bg-tertiary);
+}
+
+body.dark-mode .dropdown-menu {
+  background: var(--bg-secondary);
+  border-color: var(--border-color);
+}
+
+body.dark-mode .dropdown-item:hover {
+  background: var(--bg-tertiary);
+}
+
+body.dark-mode .toast {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+/* Alert styles for dark mode */
+body.dark-mode .alert-warning {
+  background: #78350f;
+  color: #fef3c7;
+}
+
+body.dark-mode .alert-success {
+  background: #064e3b;
+  color: #d1fae5;
+}
+
+body.dark-mode .alert-error {
+  background: #7f1d1d;
+  color: #fee2e2;
+}
+
+/* Badge styles for dark mode */
+body.dark-mode .badge-peak {
+  background: #dc2626;
+  color: white;
+}
+
+body.dark-mode .badge-holiday {
+  background: #78350f;
+  color: #fef3c7;
+}
+
+body.dark-mode .badge-weekend {
+  background: #312e81;
+  color: #c7d2fe;
+}
+
+/* Chart adjustments for dark mode */
+body.dark-mode .chart-container {
+  filter: brightness(0.9);
+}
+
+/* Loading screen for dark mode */
+body.dark-mode .loading-screen {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+}
+
+/* Scrollbar styling for dark mode */
+body.dark-mode::-webkit-scrollbar {
+  width: 12px;
+}
+
+body.dark-mode::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+body.dark-mode::-webkit-scrollbar-thumb {
+  background: var(--bg-tertiary);
+  border-radius: 6px;
+}
+
+body.dark-mode::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+/* Modal overlay for dark mode */
+body.dark-mode .modal-overlay {
+  background: rgba(0, 0, 0, 0.8);
+}
+
+body.dark-mode .modal-content {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+/* Print adjustments to ignore dark mode */
+@media print {
+  body.dark-mode {
+    background: white !important;
+  }
+
+  body.dark-mode * {
+    background: inherit !important;
+    color: black !important;
+  }
+}

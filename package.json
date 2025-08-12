@@ -1,0 +1,32 @@
+{
+  "name": "warehouse-schedule-miavn",
+  "version": "2.0.0",
+  "description": "Hệ thống quản lý lịch làm việc kho vận MIA.VN - Phiên bản tối ưu",
+  "main": "index.html",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "deploy": "vercel --prod"
+  },
+  "keywords": [
+    "warehouse",
+    "schedule",
+    "management",
+    "vietnam"
+  ],
+  "author": "MIA.VN Team",
+  "license": "MIT",
+  "devDependencies": {
+    "vite": "^5.0.8",
+    "@vitejs/plugin-legacy": "^5.2.0",
+    "terser": "^5.24.0"
+  },
+  "dependencies": {
+    "chart.js": "^4.4.1",
+    "date-fns": "^3.0.6",
+    "jspdf": "^2.5.1",
+    "jspdf-autotable": "^3.8.1",
+    "xlsx": "^0.18.5"
+  }
+}

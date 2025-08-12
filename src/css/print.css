@@ -1,0 +1,299 @@
+/* ===========================
+   Print Styles
+   =========================== */
+@media print {
+  /* Reset page margins */
+  @page {
+    margin: 0.5cm;
+    size: A4 landscape;
+  }
+
+  /* Hide non-printable elements */
+  .loading-screen,
+  .theme-toggle,
+  .controls-section,
+  .action-buttons,
+  .btn-icon,
+  .dropdown-menu,
+  .toast-container,
+  .status-indicator,
+  .chart-container,
+  .empty-state {
+    display: none !important;
+  }
+
+  /* Reset backgrounds and colors */
+  * {
+    background: transparent !important;
+    color: black !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  body {
+    font-size: 12pt;
+    line-height: 1.5;
+    font-family: "Times New Roman", Times, serif;
+  }
+
+  /* Header adjustments */
+  .app-header {
+    border: 1px solid #ccc;
+    padding: 10px !important;
+    margin-bottom: 20px !important;
+  }
+
+  .company-name {
+    font-size: 18pt !important;
+    font-weight: bold !important;
+    color: black !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .company-subtitle {
+    font-size: 10pt !important;
+    color: #666 !important;
+  }
+
+  /* Main content layout */
+  .content-grid {
+    display: block !important;
+  }
+
+  .sidebar {
+    page-break-before: always;
+    margin-top: 20px;
+  }
+
+  /* Calendar styles */
+  .calendar-container {
+    border: 1px solid #ccc;
+    padding: 10px !important;
+    page-break-inside: avoid;
+  }
+
+  .calendar-header-cell {
+    background: #333 !important;
+    color: white !important;
+    font-weight: bold !important;
+    padding: 5px !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .calendar-day {
+    border: 1px solid #ccc !important;
+    padding: 5px !important;
+    min-height: 60px !important;
+    page-break-inside: avoid;
+  }
+
+  .day-number {
+    font-weight: bold !important;
+    font-size: 10pt !important;
+  }
+
+  /* Badges */
+  .badge {
+    font-size: 8pt !important;
+    padding: 1px 3px !important;
+    border: 1px solid #333 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .badge-peak {
+    background: #ffcccc !important;
+    color: #cc0000 !important;
+  }
+
+  .badge-holiday {
+    background: #ffffcc !important;
+    color: #cc6600 !important;
+  }
+
+  .badge-weekend {
+    background: #ccccff !important;
+    color: #0000cc !important;
+  }
+
+  /* Shift blocks */
+  .shift-block {
+    font-size: 8pt !important;
+    padding: 2px !important;
+    margin: 1px 0 !important;
+    border: 1px solid #666 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .shift-phong {
+    background: #e6ffe6 !important;
+  }
+  .shift-tung {
+    background: #e6e6ff !important;
+  }
+  .shift-tuan {
+    background: #ffffe6 !important;
+  }
+  .shift-an {
+    background: #ffe6f3 !important;
+  }
+  .shift-binh {
+    background: #e6f3ff !important;
+  }
+
+  .shift-time {
+    font-size: 7pt !important;
+  }
+
+  /* Delivery indicators */
+  .delivery-time {
+    font-size: 7pt !important;
+    background: #ff6666 !important;
+    color: white !important;
+    padding: 0 2px !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Sidebar cards */
+  .info-card {
+    border: 1px solid #ccc;
+    padding: 10px !important;
+    margin-bottom: 15px !important;
+    page-break-inside: avoid;
+  }
+
+  .info-card-title {
+    font-size: 12pt !important;
+    font-weight: bold !important;
+    margin-bottom: 10px !important;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 5px;
+  }
+
+  /* Employee stats */
+  .employee-stat {
+    border: 1px solid #ccc !important;
+    padding: 5px !important;
+    margin-bottom: 5px !important;
+    page-break-inside: avoid;
+  }
+
+  .employee-name {
+    font-weight: bold !important;
+    font-size: 10pt !important;
+  }
+
+  .hours-detail {
+    font-size: 9pt !important;
+  }
+
+  .hours-progress {
+    display: none !important;
+  }
+
+  /* Delivery schedule */
+  .delivery-item {
+    border: 1px solid #ccc !important;
+    padding: 5px !important;
+    margin-bottom: 5px !important;
+  }
+
+  .delivery-carrier {
+    font-weight: bold !important;
+    font-size: 10pt !important;
+  }
+
+  .delivery-times {
+    font-size: 9pt !important;
+  }
+
+  /* Stats grid */
+  .stats-grid {
+    display: grid !important;
+    grid-template-columns: repeat(5, 1fr) !important;
+    gap: 10px !important;
+    margin-bottom: 15px !important;
+  }
+
+  .stat-card {
+    border: 1px solid #ccc !important;
+    padding: 5px !important;
+  }
+
+  .stat-number {
+    font-size: 14pt !important;
+    font-weight: bold !important;
+  }
+
+  .stat-label {
+    font-size: 9pt !important;
+  }
+
+  /* Links */
+  a {
+    text-decoration: underline !important;
+    color: black !important;
+  }
+
+  /* Page breaks */
+  .page-break {
+    page-break-after: always;
+  }
+
+  /* Footer for print */
+  .print-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 9pt;
+    padding: 5px;
+    border-top: 1px solid #ccc;
+  }
+
+  /* Show print-only elements */
+  .print-only {
+    display: block !important;
+  }
+
+  /* Ensure text is readable */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    page-break-after: avoid;
+    page-break-inside: avoid;
+  }
+
+  p,
+  li,
+  blockquote {
+    orphans: 3;
+    widows: 3;
+  }
+
+  /* Table styles for print */
+  table {
+    border-collapse: collapse !important;
+    width: 100%;
+  }
+
+  td,
+  th {
+    border: 1px solid #ccc !important;
+    padding: 5px !important;
+  }
+
+  /* Optimize images for print */
+  img {
+    max-width: 100% !important;
+    page-break-inside: avoid;
+  }
+}
